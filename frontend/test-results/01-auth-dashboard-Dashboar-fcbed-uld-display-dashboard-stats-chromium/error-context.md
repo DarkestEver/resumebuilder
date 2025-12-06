@@ -1,0 +1,113 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - generic [ref=e4]:
+        - link "ProfileBuilder" [ref=e5] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e6]:
+          - link "Dashboard" [ref=e7] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Profile" [ref=e8] [cursor=pointer]:
+            - /url: /profile
+          - link "Resumes" [ref=e9] [cursor=pointer]:
+            - /url: /resume
+      - generic [ref=e10]:
+        - generic [ref=e11]: designer.alex@test.com
+        - button "Logout" [ref=e12] [cursor=pointer]
+  - generic [ref=e13]:
+    - generic [ref=e15]:
+      - img [ref=e17]
+      - generic [ref=e19]:
+        - paragraph [ref=e20]: Your email is not verified. Please check your inbox for a verification link.
+        - button "Resend verification email" [ref=e22] [cursor=pointer]
+      - button "Dismiss" [ref=e24] [cursor=pointer]:
+        - generic [ref=e25]: Dismiss
+        - img [ref=e26]
+    - banner [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "Dashboard" [level=1] [ref=e32]
+          - paragraph [ref=e33]: Manage your resumes and profile
+        - generic [ref=e34]:
+          - link "Upload CV" [ref=e35] [cursor=pointer]:
+            - /url: /upload-cv
+            - img [ref=e36]
+            - text: Upload CV
+          - link "Profile" [ref=e39] [cursor=pointer]:
+            - /url: /profile
+          - button "Logout" [ref=e40] [cursor=pointer]
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - img [ref=e45]
+          - generic [ref=e48]: "0"
+          - generic [ref=e49]: Total Resumes
+        - generic [ref=e50]:
+          - img [ref=e52]
+          - generic [ref=e55]: "0"
+          - generic [ref=e56]: Public
+        - generic [ref=e57]:
+          - img [ref=e59]
+          - generic [ref=e62]: "0"
+          - generic [ref=e63]: Private
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - generic [ref=e69]: "0"
+          - generic [ref=e70]: Views
+        - generic [ref=e71]:
+          - img [ref=e73]
+          - generic [ref=e76]: "0"
+          - generic [ref=e77]: Downloads
+        - generic [ref=e78]:
+          - img [ref=e80]
+          - generic [ref=e83]: 0%
+          - generic [ref=e84]: Profile
+      - generic [ref=e85]:
+        - button "Create New Resume Start from scratch or use a template" [ref=e86] [cursor=pointer]:
+          - img [ref=e88]
+          - heading "Create New Resume" [level=3] [ref=e89]
+          - paragraph [ref=e90]: Start from scratch or use a template
+          - img [ref=e91]
+        - link "Upload CV Extract data from existing resume" [ref=e93] [cursor=pointer]:
+          - /url: /upload-cv
+          - img [ref=e94]
+          - heading "Upload CV" [level=3] [ref=e97]
+          - paragraph [ref=e98]: Extract data from existing resume
+          - img [ref=e99]
+        - link "Build Profile Complete your professional profile" [ref=e101] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e102]
+          - heading "Build Profile" [level=3] [ref=e106]
+          - paragraph [ref=e107]: Complete your professional profile
+          - img [ref=e109]
+      - generic [ref=e111]:
+        - generic [ref=e112]:
+          - generic [ref=e113]:
+            - heading "Your Resumes" [level=2] [ref=e114]
+            - paragraph [ref=e115]: Manage and edit your resumes
+          - button "New Resume" [ref=e116] [cursor=pointer]:
+            - img [ref=e117]
+            - generic [ref=e118]: New Resume
+        - generic [ref=e119]:
+          - img [ref=e121]
+          - heading "No resumes yet" [level=3] [ref=e124]
+          - paragraph [ref=e125]: Create your first resume to get started
+          - button "Create Your First Resume" [ref=e126] [cursor=pointer]:
+            - img [ref=e127]
+            - text: Create Your First Resume
+  - region "Notifications alt+T":
+    - list:
+      - listitem [ref=e128]:
+        - img [ref=e130]
+        - generic [ref=e133]: Failed to load dashboard data
+      - listitem [ref=e134]:
+        - img [ref=e136]
+        - generic [ref=e139]: Failed to load dashboard data
+      - listitem [ref=e140]:
+        - img [ref=e142]
+        - generic [ref=e145]: Welcome back!
+  - alert [ref=e146]
+```

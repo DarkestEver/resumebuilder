@@ -1,0 +1,85 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - navigation [ref=e3]:
+      - link "ProfileBuilder" [ref=e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e6]:
+        - link "Login" [ref=e7] [cursor=pointer]:
+          - /url: /login
+        - link "Sign Up" [ref=e8] [cursor=pointer]:
+          - /url: /register
+  - generic [ref=e9]:
+    - generic [ref=e11]:
+      - generic [ref=e13]: R
+      - generic [ref=e14]: Resume Builder
+    - main [ref=e15]:
+      - generic [ref=e16]:
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - link "ProfileBuilder" [ref=e20] [cursor=pointer]:
+              - /url: /
+              - img [ref=e22]
+              - generic [ref=e24]: ProfileBuilder
+            - heading "Welcome back" [level=2] [ref=e25]
+            - paragraph [ref=e26]: Sign in to continue building your profile
+          - generic [ref=e27]:
+            - button "Password" [ref=e28] [cursor=pointer]
+            - button "OTP" [ref=e29] [cursor=pointer]
+          - generic [ref=e30]: Too many authentication attempts, please try again in 15 minutes
+          - generic [ref=e31]:
+            - generic [ref=e32]:
+              - generic [ref=e33]:
+                - generic [ref=e34]: Email Address
+                - generic [ref=e35]:
+                  - img [ref=e36]
+                  - textbox "Email Address" [ref=e39]:
+                    - /placeholder: you@example.com
+                    - text: designer.alex@test.com
+              - generic [ref=e40]:
+                - generic [ref=e41]: Password
+                - generic [ref=e42]:
+                  - img [ref=e43]
+                  - textbox "Password" [ref=e46]:
+                    - /placeholder: ••••••••
+                    - text: DesignPass123!
+                  - button [ref=e47] [cursor=pointer]:
+                    - img [ref=e48]
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - checkbox "Remember me" [ref=e53]
+                - generic [ref=e54]: Remember me
+              - link "Forgot password?" [ref=e55] [cursor=pointer]:
+                - /url: /forgot-password
+            - button "Sign In" [ref=e56] [cursor=pointer]:
+              - text: Sign In
+              - img [ref=e57]
+          - generic [ref=e59]:
+            - text: Don't have an account?
+            - link "Sign up for free" [ref=e60] [cursor=pointer]:
+              - /url: /register
+        - generic [ref=e65]:
+          - heading "Build Your Perfect Professional Resume" [level=1] [ref=e66]:
+            - text: Build Your Perfect
+            - text: Professional Resume
+          - paragraph [ref=e67]: Create stunning resumes in minutes with AI-powered content suggestions and 20+ professional templates
+          - list [ref=e68]:
+            - listitem [ref=e69]:
+              - generic [ref=e70]: ✓
+              - generic [ref=e71]: AI-powered content suggestions
+            - listitem [ref=e72]:
+              - generic [ref=e73]: ✓
+              - generic [ref=e74]: 20+ professional templates
+            - listitem [ref=e75]:
+              - generic [ref=e76]: ✓
+              - generic [ref=e77]: ATS-optimized formatting
+            - listitem [ref=e78]:
+              - generic [ref=e79]: ✓
+              - generic [ref=e80]: Export & share instantly
+    - contentinfo [ref=e81]:
+      - generic [ref=e82]: © 2025 Resume Builder. All rights reserved.
+  - region "Notifications alt+T"
+  - alert [ref=e83]
+```

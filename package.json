@@ -1,0 +1,40 @@
+{
+  "name": "profilebuilder",
+  "version": "1.0.0",
+  "description": "AI-powered Resume Builder Portal",
+  "private": true,
+  "scripts": {
+    "dev:backend": "cd backend && npm run start:dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "echo Run 'npm run dev:backend' and 'npm run dev:frontend' in separate terminals",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:populate": "playwright test tests/populate-sample-data.spec.ts",
+    "test:populate:api": "playwright test tests/populate-via-api.spec.ts",
+    "test:report": "playwright show-report",
+    "lint": "cd backend && npm run lint && cd ../frontend && npm run lint"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "docx-parser": "^0.2.1",
+    "pdf-parse": "^2.4.5",
+    "pdfkit": "^0.17.2",
+    "tesseract.js": "^6.0.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "mongoose": "^9.0.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.6",
+    "typescript": "^5.9.3"
+  }
+}
