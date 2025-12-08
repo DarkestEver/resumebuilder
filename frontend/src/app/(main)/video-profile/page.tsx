@@ -4,16 +4,91 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect } from 'react';
 import VideoUpload from '@/components/VideoUpload';
 import VideoPlayer from '@/components/VideoPlayer';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { authStore } from '@/stores/authStore';
+import apiClient from '@/lib/api/auth';
 
 export default function VideoProfilePage() {
-  const params = useParams();
-  const profileId = (params?.profileId as string) || '';
+  const { user } = authStore();
+  const [profileId, setProfileId] = useState<string>('');
   const [uploaded, setUploaded] = useState(false);
+  const [hasExistingVideo, setHasExistingVideo] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await apiClient.get('/profiles');
+        
+        // Profile API returns: { success: true, data: { profile: {...} } }
+        const profile = response.data?.data?.profile;
+        
+        if (profile && profile._id) {
+          const fetchedProfileId = profile._id;
+          setProfileId(fetchedProfileId);
+          
+          // Check if video already exists
+          try {
+            const videoResponse = await apiClient.get(`/videos/${fetchedProfileId}`);
+            if (videoResponse.data.success && videoResponse.data.data) {
+              setHasExistingVideo(true);
+              setUploaded(true);
+            }
+          } catch (err) {
+            // No video exists yet, that's fine
+            setHasExistingVideo(false);
+          }
+        } else {
+          // Profile doesn't exist
+          console.log('No profile found');
+          setProfileId('');
+        }
+      } catch (error: any) {
+        console.error('Failed to fetch profile:', error);
+        setProfileId('');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      fetchProfile();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
+
+  if (!profileId) {
+    return (
+      <ProtectedRoute>
+        <div className="min-h-screen bg-gray-50 py-12 flex items-center justify-center">
+          <div className="text-center">
+            <div className="text-red-600 mb-4">⚠️ Profile Not Found</div>
+            <p className="text-gray-600">Please complete your profile first.</p>
+            <a href="/profile" className="mt-4 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Go to Profile
+            </a>
+          </div>
+        </div>
+      </ProtectedRoute>
+    );
+  }
 
   return (
     <ProtectedRoute>
@@ -29,7 +104,10 @@ export default function VideoProfilePage() {
           {!uploaded ? (
             <div className="bg-white rounded-lg shadow p-8 mb-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Upload Your Video</h2>
-              <VideoUpload onSuccess={() => setUploaded(true)} />
+              <VideoUpload onSuccess={() => {
+                setUploaded(true);
+                setHasExistingVideo(true);
+              }} />
             </div>
           ) : (
             <div className="bg-white rounded-lg shadow p-8">
@@ -40,7 +118,7 @@ export default function VideoProfilePage() {
                 onClick={() => setUploaded(false)}
                 className="mt-6 px-4 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 font-semibold"
               >
-                Upload New Video
+                {hasExistingVideo ? 'Replace Video' : 'Upload New Video'}
               </button>
             </div>
           )}

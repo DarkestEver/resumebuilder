@@ -108,6 +108,15 @@ router.get('/:profileId', async (_req: Request, res: Response): Promise<void> =>
   try {
     const { profileId } = _req.params;
 
+    // Validate profileId format
+    if (!profileId || profileId === 'undefined' || profileId === 'null') {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid profile ID',
+      });
+      return;
+    }
+
     const videoProfile = await videoUploadService.getVideoProfile(profileId);
     if (!videoProfile) {
       res.status(404).json({
@@ -121,10 +130,11 @@ router.get('/:profileId', async (_req: Request, res: Response): Promise<void> =>
       success: true,
       data: videoProfile,
     });
-  } catch (error) {
+  } catch (error: any) {
+    console.error('Error fetching video profile:', error);
     res.status(500).json({
       success: false,
-      error: 'Failed to fetch video',
+      error: error.message || 'Failed to fetch video',
     });
   }
 });

@@ -130,6 +130,51 @@ export default function PublicProfilePage() {
           </div>
         )}
 
+        {/* Video Profile */}
+        {data.profile?.videoProfile && data.profile.videoProfile.videoUrl && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <span>🎥</span>
+              Video Introduction
+            </h2>
+            <div className="relative w-full max-w-3xl mx-auto">
+              <div className="aspect-video bg-black rounded-lg overflow-hidden shadow-lg">
+                <video
+                  src={`http://localhost:5000${data.profile.videoProfile.videoUrl}`}
+                  controls
+                  className="w-full h-full"
+                  controlsList="nodownload"
+                  crossOrigin="anonymous"
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              
+              {/* Video Stats */}
+              <div className="flex items-center gap-6 mt-4 text-sm text-gray-600">
+                {data.profile.videoProfile.duration && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Duration:</span>
+                    <span>{Math.floor(data.profile.videoProfile.duration / 60)}:{String(data.profile.videoProfile.duration % 60).padStart(2, '0')}</span>
+                  </div>
+                )}
+                {data.profile.videoProfile.views !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    <span>{data.profile.videoProfile.views} views</span>
+                  </div>
+                )}
+                {data.profile.videoProfile.uploadedAt && (
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium">Uploaded:</span>
+                    <span>{new Date(data.profile.videoProfile.uploadedAt).toLocaleDateString()}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Public Resumes */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-6">

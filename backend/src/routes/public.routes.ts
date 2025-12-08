@@ -3,6 +3,7 @@ import { Resume } from '../models/Resume.model';
 import { Profile } from '../models/Profile.model';
 import { User } from '../models/User.model';
 import { Analytics } from '../models/Analytics.model';
+import { VideoProfile } from '../models/VideoProfile.model';
 import { logger } from '../utils/logger';
 
 const router = Router();
@@ -139,6 +140,12 @@ router.get('/profile/:username', async (req: Request, res: Response) => {
       visibility: 'public',
     });
 
+    // Get video profile (only if public)
+    const videoProfile = await VideoProfile.findOne({
+      profileId: profile._id,
+      isPublic: true,
+    });
+
     res.json({
       success: true,
       data: {
@@ -165,6 +172,15 @@ router.get('/profile/:username', async (req: Request, res: Response) => {
           certifications: profile.certifications,
           languages: profile.languages,
           achievements: profile.achievements,
+          videoProfile: videoProfile ? {
+            _id: videoProfile._id,
+            videoUrl: videoProfile.videoUrl,
+            duration: videoProfile.duration,
+            views: videoProfile.views,
+            likes: videoProfile.likes,
+            uploadedAt: videoProfile.uploadedAt,
+            isPublic: videoProfile.isPublic,
+          } : undefined,
         },
         resumes: resumes.map((r) => ({
           id: r._id,

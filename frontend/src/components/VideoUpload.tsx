@@ -5,6 +5,7 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
+import { authStore } from '@/stores/authStore';
 
 interface VideoUploadProps {
   onSuccess?: (videoId: string) => void;
@@ -68,7 +69,14 @@ export default function VideoUpload({ onSuccess }: VideoUploadProps) {
       const formData = new FormData();
       formData.append('video', file);
 
-      const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+      // Get token from auth store
+      const token = authStore.getState().accessToken;
+
+      if (!token) {
+        setError('Please login to upload videos');
+        setUploading(false);
+        return;
+      }
 
       const xhr = new XMLHttpRequest();
 
@@ -106,7 +114,7 @@ export default function VideoUpload({ onSuccess }: VideoUploadProps) {
         setUploading(false);
       });
 
-      xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL}/api/videos/upload`);
+      xhr.open('POST', `${process.env.NEXT_PUBLIC_API_URL}/videos/upload`);
       xhr.setRequestHeader('Authorization', `Bearer ${token}`);
       xhr.send(formData);
     } catch (err) {

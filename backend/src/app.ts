@@ -39,7 +39,9 @@ mongoose
 
 // Middleware
 app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginEmbedderPolicy: false,
+  contentSecurityPolicy: false,
 }));
 app.use(cors({
   origin: config.cors.origin,
@@ -49,10 +51,29 @@ app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) }
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static files (uploaded photos) with CORS headers
+// Serve static files (uploaded photos and videos) with CORS headers
 app.use('/uploads', (_req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Range');
+  res.setHeader('Access-Control-Expose-Headers', 'Content-Length, Content-Range');
+  
+  // Set proper content type for video files
+  if (_req.path.match(/\.(mp4|avi|mov|mkv|webm)$/i)) {
+    const ext = _req.path.split('.').pop()?.toLowerCase();
+    const mimeTypes: Record<string, string> = {
+      'mp4': 'video/mp4',
+      'avi': 'video/x-msvideo',
+      'mov': 'video/quicktime',
+      'mkv': 'video/x-matroska',
+      'webm': 'video/webm'
+    };
+    if (ext && mimeTypes[ext]) {
+      res.setHeader('Content-Type', mimeTypes[ext]);
+    }
+  }
+  
   next();
 }, express.static(path.join(__dirname, '../uploads')));
 

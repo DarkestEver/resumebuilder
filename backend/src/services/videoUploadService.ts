@@ -16,15 +16,38 @@ interface VideoMetadata {
 
 class VideoUploadService {
   /**
-   * Save video and create metadata record
+   * Save video and create/update metadata record
    */
   async uploadVideo(metadata: VideoMetadata): Promise<IVideoProfile> {
     try {
       const fileSize = fs.statSync(metadata.filePath).size;
       const duration = await this.estimateVideoDuration(metadata.filePath);
 
-      const videoUrl = `/videos/${metadata.profileId}/${metadata.fileName}`;
+      // Store relative path for serving via express static
+      const videoUrl = `/uploads/videos/${metadata.fileName}`;
 
+      // Check if video already exists for this profile
+      const existingVideo = await VideoProfile.findOne({
+        profileId: new mongoose.Types.ObjectId(metadata.profileId),
+      });
+
+      if (existingVideo) {
+        // Delete old video file
+        const oldFilePath = path.join(process.cwd(), 'uploads', 'videos', path.basename(existingVideo.videoUrl));
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
+
+        // Update existing video profile
+        existingVideo.videoUrl = videoUrl;
+        existingVideo.duration = duration;
+        existingVideo.fileSize = fileSize;
+        existingVideo.uploadedAt = new Date();
+        
+        return await existingVideo.save();
+      }
+
+      // Create new video profile
       const videoProfile = new VideoProfile({
         profileId: new mongoose.Types.ObjectId(metadata.profileId),
         videoUrl,
