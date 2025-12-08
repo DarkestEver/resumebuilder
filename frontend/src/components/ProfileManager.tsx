@@ -211,8 +211,9 @@ export default function ProfileManager() {
             >
               {/* Default Badge */}
               {profile.isDefault && (
-                <div className="absolute top-4 right-4">
-                  <Star size={20} className="text-yellow-500 fill-yellow-500" />
+                <div className="absolute top-4 right-4 flex items-center gap-1 bg-yellow-50 border border-yellow-200 px-2 py-1 rounded-full">
+                  <Star size={14} className="text-yellow-600 fill-yellow-500" />
+                  <span className="text-xs font-medium text-yellow-700">Default</span>
                 </div>
               )}
 

@@ -11,8 +11,10 @@ export interface ResumeData {
   contact?: {
     email?: string;
     phone?: string;
+    alternatePhone?: string;
     address?: {
       street?: string;
+      apartment?: string;
       city?: string;
       state?: string;
       zipCode?: string;
@@ -21,6 +23,13 @@ export interface ResumeData {
     website?: string;
     linkedin?: string;
     github?: string;
+    portfolio?: string;
+  };
+  signature?: {
+    name?: string;
+    date?: string;
+    place?: string;
+    image?: string;
   };
   summary?: string;
   experience?: Array<{
@@ -68,84 +77,198 @@ export interface ResumeData {
  * Generate Modern Resume PDF
  */
 export function generateModernPDF(data: ResumeData): Readable {
-  const doc = new PDFDocument();
+  const doc = new PDFDocument({
+    margins: { top: 50, bottom: 50, left: 50, right: 50 },
+    size: 'LETTER'
+  });
   const buffers: Buffer[] = [];
   
   doc.on('data', (chunk: Buffer) => buffers.push(chunk));
 
-  // Header
-  doc.fontSize(24).font('Helvetica-Bold').text(`${data.personalInfo?.firstName} ${data.personalInfo?.lastName}`, { align: 'left' });
-  if (data.personalInfo?.title) {
-    doc.fontSize(13).fillColor('#2563eb').text(data.personalInfo.title);
-  }
-
-  // Contact info
-  if (data.contact?.email || data.contact?.phone || data.contact?.linkedin) {
-    const contactInfo = [
-      data.contact?.email,
-      data.contact?.phone,
-      data.contact?.linkedin,
-    ]
-      .filter(Boolean)
-      .join(' • ');
-    doc.fontSize(10).fillColor('#000').text(contactInfo);
-  }
-
-  doc.moveDown(0.5);
-  doc.strokeColor('#2563eb').lineWidth(2).moveTo(50, doc.y).lineTo(550, doc.y).stroke();
+  // Header - Full name
+  const firstName = data.personalInfo?.firstName || '';
+  const lastName = data.personalInfo?.lastName || '';
+  const fullName = `${firstName} ${lastName}`.trim() || 'Untitled Resume';
+  
+  // Name with more spacing
+  doc.fontSize(28).font('Helvetica-Bold').fillColor('#1F2937').text(fullName, {
+    align: 'left'
+  });
+  
   doc.moveDown(0.3);
+  
+  // Title
+  if (data.personalInfo?.title) {
+    doc.fontSize(14).font('Helvetica').fillColor('#4B5563').text(data.personalInfo.title);
+    doc.moveDown(0.3);
+  }
+
+  // Contact info with better formatting
+  if (data.contact?.email || data.contact?.phone || data.contact?.linkedin) {
+    doc.fontSize(9).fillColor('#6B7280');
+    const contactParts = [];
+    
+    if (data.contact?.email) contactParts.push(data.contact.email);
+    if (data.contact?.phone) contactParts.push(data.contact.phone);
+    if (data.contact?.linkedin) contactParts.push(data.contact.linkedin);
+    
+    doc.text(contactParts.join('  •  '));
+  }
+
+  // Separator line
+  doc.moveDown(0.8);
+  doc.strokeColor('#1F2937').lineWidth(2.5).moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+  doc.moveDown(0.8);
 
   // Summary
   if (data.summary) {
-    doc.fontSize(11).font('Helvetica-Bold').text('PROFESSIONAL SUMMARY', { underline: true });
-    doc.fontSize(10).font('Helvetica').text(data.summary);
-    doc.moveDown(0.3);
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('PROFESSIONAL SUMMARY');
+    doc.moveDown(0.4);
+    doc.fontSize(10).font('Helvetica').fillColor('#374151').text(data.summary, {
+      align: 'left',
+      lineGap: 2
+    });
+    doc.moveDown(1);
   }
 
   // Experience
   if (data.experience && data.experience.length > 0) {
-    doc.fontSize(11).font('Helvetica-Bold').text('EXPERIENCE', { underline: true });
-    data.experience.forEach((job) => {
-      doc.fontSize(10).font('Helvetica-Bold').text(job.title || '');
-      doc.fontSize(9).font('Helvetica').fillColor('#666').text(`${job.company} ${job.location ? `• ${job.location}` : ''}`);
-      doc.fontSize(9).fillColor('#666').text(`${job.startDate} – ${job.endDate || 'Present'}`);
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('PROFESSIONAL EXPERIENCE');
+    doc.moveDown(0.4);
+    
+    data.experience.forEach((job, index) => {
+      // Job title
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#1F2937').text(job.title || '');
+      
+      // Company and location
+      doc.fontSize(10).font('Helvetica').fillColor('#6B7280').text(
+        `${job.company}${job.location ? ` • ${job.location}` : ''}`
+      );
+      
+      // Dates
+      doc.fontSize(9).fillColor('#9CA3AF').text(
+        `${job.startDate || ''} – ${job.endDate || 'Present'}`
+      );
+      
+      // Description
       if (job.description) {
-        doc.fontSize(9).fillColor('#000').text(job.description);
+        doc.moveDown(0.2);
+        doc.fontSize(10).fillColor('#374151').text(job.description, {
+          align: 'left',
+          lineGap: 1
+        });
       }
-      doc.moveDown(0.2);
+      
+      if (index < data.experience.length - 1) {
+        doc.moveDown(0.6);
+      }
     });
-    doc.moveDown(0.3);
+    doc.moveDown(1);
   }
 
   // Education
   if (data.education && data.education.length > 0) {
-    doc.fontSize(11).font('Helvetica-Bold').text('EDUCATION', { underline: true });
-    data.education.forEach((edu) => {
-      doc.fontSize(10).font('Helvetica-Bold').text(edu.degree || '');
-      doc.fontSize(9).font('Helvetica').fillColor('#666').text(`${edu.institution} ${edu.location ? `• ${edu.location}` : ''}`);
-      if (edu.gpa) {
-        doc.fontSize(9).fillColor('#000').text(`GPA: ${edu.gpa}`);
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('EDUCATION');
+    doc.moveDown(0.4);
+    
+    data.education.forEach((edu, index) => {
+      // Degree
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#1F2937').text(edu.degree || '');
+      
+      // Institution
+      doc.fontSize(10).font('Helvetica').fillColor('#6B7280').text(
+        `${edu.institution}${edu.location ? ` • ${edu.location}` : ''}`
+      );
+      
+      // Dates and GPA
+      const eduDetails = [];
+      if (edu.startDate && edu.endDate) {
+        eduDetails.push(`${edu.startDate} – ${edu.endDate}`);
       }
-      doc.moveDown(0.2);
+      if (edu.gpa) {
+        eduDetails.push(`GPA: ${edu.gpa}`);
+      }
+      if (eduDetails.length > 0) {
+        doc.fontSize(9).fillColor('#9CA3AF').text(eduDetails.join(' • '));
+      }
+      
+      if (index < data.education.length - 1) {
+        doc.moveDown(0.6);
+      }
     });
-    doc.moveDown(0.3);
+    doc.moveDown(1);
   }
 
   // Skills
   if (data.skills && data.skills.length > 0) {
-    doc.fontSize(11).font('Helvetica-Bold').text('SKILLS', { underline: true });
-    const skillNames = data.skills.map((s) => s.name).join(' • ');
-    doc.fontSize(10).font('Helvetica').text(skillNames);
-    doc.moveDown(0.3);
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('SKILLS');
+    doc.moveDown(0.4);
+    const skillNames = data.skills.map((s) => s.name).filter(Boolean).join('  •  ');
+    doc.fontSize(10).font('Helvetica').fillColor('#374151').text(skillNames, {
+      align: 'left',
+      lineGap: 2
+    });
+    doc.moveDown(1);
+  }
+
+  // Projects
+  if (data.projects && data.projects.length > 0) {
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('PROJECTS');
+    doc.moveDown(0.4);
+    
+    data.projects.forEach((project, index) => {
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#1F2937').text(project.name || '');
+      
+      if (project.description) {
+        doc.fontSize(10).font('Helvetica').fillColor('#374151').text(project.description);
+      }
+      
+      if (project.technologies && project.technologies.length > 0) {
+        doc.fontSize(9).fillColor('#6B7280').text(
+          `Technologies: ${project.technologies.join(', ')}`
+        );
+      }
+      
+      if (index < data.projects.length - 1) {
+        doc.moveDown(0.6);
+      }
+    });
+    doc.moveDown(1);
+  }
+
+  // Certifications
+  if (data.certifications && data.certifications.length > 0) {
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('CERTIFICATIONS');
+    doc.moveDown(0.4);
+    
+    data.certifications.forEach((cert, index) => {
+      doc.fontSize(10).font('Helvetica-Bold').fillColor('#1F2937').text(cert.name || '');
+      
+      const certDetails = [];
+      if (cert.issuer) certDetails.push(cert.issuer);
+      if (cert.date) certDetails.push(cert.date);
+      
+      if (certDetails.length > 0) {
+        doc.fontSize(9).fillColor('#6B7280').text(certDetails.join(' • '));
+      }
+      
+      if (index < data.certifications.length - 1) {
+        doc.moveDown(0.4);
+      }
+    });
+    doc.moveDown(1);
   }
 
   // Languages
   if (data.languages && data.languages.length > 0) {
-    doc.fontSize(11).font('Helvetica-Bold').text('LANGUAGES', { underline: true });
-    data.languages.forEach((lang) => {
-      doc.fontSize(10).font('Helvetica').text(`${lang.name} – ${lang.proficiency}`);
-    });
-    doc.moveDown(0.3);
+    doc.fontSize(12).font('Helvetica-Bold').fillColor('#1F2937').text('LANGUAGES');
+    doc.moveDown(0.4);
+    
+    const languageText = data.languages
+      .map((lang) => `${lang.name} (${lang.proficiency})`)
+      .join('  •  ');
+    
+    doc.fontSize(10).font('Helvetica').fillColor('#374151').text(languageText);
   }
 
   doc.end();

@@ -143,7 +143,6 @@ export class LinkedInOAuthService {
       const lastNameKey = Object.keys(linkedInProfile.lastName.localized)[0];
       const firstName = linkedInProfile.firstName.localized[firstNameKey];
       const lastName = linkedInProfile.lastName.localized[lastNameKey];
-      const fullName = `${firstName} ${lastName}`;
 
       // Find or create profile
       let profile = await Profile.findOne({ userId });

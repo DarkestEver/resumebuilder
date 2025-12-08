@@ -99,7 +99,7 @@ router.get('/linkedin', (_req, res) => {
  */
 router.get('/linkedin/callback', async (req, res) => {
   try {
-    const { code, state, error, error_description } = req.query;
+    const { code, error, error_description } = req.query;
 
     // Check for OAuth errors
     if (error) {

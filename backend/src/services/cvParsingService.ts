@@ -1,7 +1,7 @@
 import { parseDocx } from 'docx-parser';
 import Tesseract from 'tesseract.js';
 import PDFParser from 'pdf2json';
-import fs from 'fs';
+
 
 /**
  * CV Parsing Service
@@ -74,7 +74,7 @@ export const cvParsingService = {
 
       // Strategy 2: Try pdf2json (works for PDFs with XRef issues)
       try {
-        const pdfParser = new PDFParser(null, 1);
+        const pdfParser = new PDFParser(null, true);
         
         await new Promise<void>((resolve, reject) => {
           pdfParser.on('pdfParser_dataError', (errData: any) => {

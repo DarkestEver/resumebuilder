@@ -6,7 +6,7 @@
  * Supports multiple profiles via profileId query parameter
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { profileStore } from '@/stores/profileStore';
@@ -18,7 +18,7 @@ import {
   FolderOpen, BookOpen, Trophy, FileText, Lightbulb
 } from 'lucide-react';
 
-export default function ProfilePage() {
+function ProfilePageContent() {
   const searchParams = useSearchParams();
   const profileId = searchParams.get('profileId');
   const { profile, isLoading, isSaving, error, completionPercentage, fetchProfile, createProfile, updateProfile } = profileStore();
@@ -165,6 +165,12 @@ export default function ProfilePage() {
         {/* Main Content */}
         <div className="max-w-6xl mx-auto px-6 py-6">
           <div className="space-y-4">
+            {/* Contact Information Section */}
+            <ContactSection profile={profile} updateProfile={updateProfile} />
+
+            {/* Personal Information Section */}
+            <PersonalInfoSection profile={profile} updateProfile={updateProfile} />
+
             {/* About Section */}
             <AboutSection profile={profile} updateProfile={updateProfile} />
 
@@ -191,10 +197,413 @@ export default function ProfilePage() {
 
             {/* Courses Section */}
             <CoursesSection profile={profile} updateProfile={updateProfile} />
+
+            {/* Signature Section */}
+            <SignatureSection profile={profile} updateProfile={updateProfile} />
           </div>
         </div>
       </div>
     </ProtectedRoute>
+  );
+}
+
+// Contact Section Component
+function ContactSection({ profile, updateProfile }: any) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [contact, setContact] = useState(profile?.contact || {
+    email: '',
+    phone: '',
+    alternatePhone: '',
+    address: {
+      street: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: ''
+    },
+    website: '',
+    linkedin: '',
+    github: '',
+    portfolio: ''
+  });
+
+  const handleSave = async () => {
+    await updateProfile({ contact });
+    setIsEditing(false);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    if (field.startsWith('address.')) {
+      const addressField = field.split('.')[1];
+      setContact({
+        ...contact,
+        address: { ...contact.address, [addressField]: value }
+      });
+    } else {
+      setContact({ ...contact, [field]: value });
+    }
+  };
+
+  return (
+    <Section title="Contact Information" icon={Mail} onEdit={() => setIsEditing(true)}>
+      {isEditing ? (
+        <div className="space-y-4">
+          {/* Primary Contact */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={contact.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="your.email@example.com"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={contact.phone}
+                onChange={(e) => handleChange('phone', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="+1 234 567 8900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Alternate Phone</label>
+              <input
+                type="tel"
+                value={contact.alternatePhone}
+                onChange={(e) => handleChange('alternatePhone', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="+1 234 567 8901"
+              />
+            </div>
+          </div>
+
+          {/* Address */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Address</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+                <input
+                  type="text"
+                  value={contact.address?.street || ''}
+                  onChange={(e) => handleChange('address.street', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="123 Main Street"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Apartment/Suite</label>
+                <input
+                  type="text"
+                  value={contact.address?.apartment || ''}
+                  onChange={(e) => handleChange('address.apartment', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Apt 4B"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                <input
+                  type="text"
+                  value={contact.address?.city || ''}
+                  onChange={(e) => handleChange('address.city', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="New York"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">State/Province</label>
+                <input
+                  type="text"
+                  value={contact.address?.state || ''}
+                  onChange={(e) => handleChange('address.state', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="NY"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">ZIP/Postal Code</label>
+                <input
+                  type="text"
+                  value={contact.address?.zipCode || ''}
+                  onChange={(e) => handleChange('address.zipCode', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="10001"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                <input
+                  type="text"
+                  value={contact.address?.country || ''}
+                  onChange={(e) => handleChange('address.country', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="United States"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Social Links */}
+          <div>
+            <h4 className="text-sm font-semibold text-gray-900 mb-2">Professional Links</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                <input
+                  type="url"
+                  value={contact.website}
+                  onChange={(e) => handleChange('website', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://yourwebsite.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                <input
+                  type="url"
+                  value={contact.linkedin}
+                  onChange={(e) => handleChange('linkedin', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://linkedin.com/in/username"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                <input
+                  type="url"
+                  value={contact.github}
+                  onChange={(e) => handleChange('github', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://github.com/username"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Portfolio</label>
+                <input
+                  type="url"
+                  value={contact.portfolio}
+                  onChange={(e) => handleChange('portfolio', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://portfolio.com"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+            <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-700">Email:</span>
+              <span className="ml-2 text-gray-600">{contact.email || <span className="text-gray-400 italic">Not provided</span>}</span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">Phone:</span>
+              <span className="ml-2 text-gray-600">{contact.phone || <span className="text-gray-400 italic">Not provided</span>}</span>
+            </div>
+            {contact.alternatePhone && (
+              <div>
+                <span className="font-medium text-gray-700">Alternate Phone:</span>
+                <span className="ml-2 text-gray-600">{contact.alternatePhone}</span>
+              </div>
+            )}
+          </div>
+          
+          {(contact.address?.street || contact.address?.city) && (
+            <div>
+              <span className="font-medium text-gray-700">Address:</span>
+              <div className="ml-2 text-gray-600">
+                {contact.address?.street && <div>{contact.address.street}{contact.address.apartment ? `, ${contact.address.apartment}` : ''}</div>}
+                {(contact.address?.city || contact.address?.state || contact.address?.zipCode) && (
+                  <div>{contact.address?.city}{contact.address?.state ? `, ${contact.address.state}` : ''} {contact.address?.zipCode}</div>
+                )}
+                {contact.address?.country && <div>{contact.address.country}</div>}
+              </div>
+            </div>
+          )}
+
+          {(contact.website || contact.linkedin || contact.github || contact.portfolio) && (
+            <div>
+              <span className="font-medium text-gray-700">Links:</span>
+              <div className="ml-2 space-y-1">
+                {contact.website && <div className="text-blue-600"><a href={contact.website} target="_blank" rel="noopener noreferrer">{contact.website}</a></div>}
+                {contact.linkedin && <div className="text-blue-600"><a href={contact.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></div>}
+                {contact.github && <div className="text-blue-600"><a href={contact.github} target="_blank" rel="noopener noreferrer">GitHub</a></div>}
+                {contact.portfolio && <div className="text-blue-600"><a href={contact.portfolio} target="_blank" rel="noopener noreferrer">Portfolio</a></div>}
+              </div>
+            </div>
+          )}
+
+          {!contact.email && !contact.phone && !contact.address?.street && (
+            <p className="text-gray-400 italic">Add your contact information</p>
+          )}
+        </div>
+      )}
+    </Section>
+  );
+}
+
+// Personal Information Section Component
+function PersonalInfoSection({ profile, updateProfile }: any) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [personalInfo, setPersonalInfo] = useState(profile?.personalInfo || {
+    firstName: '',
+    lastName: '',
+    title: '',
+    dateOfBirth: '',
+    nationality: '',
+    placeOfBirth: '',
+    photo: ''
+  });
+
+  const handleSave = async () => {
+    await updateProfile({ personalInfo });
+    setIsEditing(false);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setPersonalInfo({ ...personalInfo, [field]: value });
+  };
+
+  return (
+    <Section title="Personal Information" icon={User} onEdit={() => setIsEditing(true)}>
+      {isEditing ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+              <input
+                type="text"
+                value={personalInfo.firstName}
+                onChange={(e) => handleChange('firstName', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="John"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+              <input
+                type="text"
+                value={personalInfo.lastName}
+                onChange={(e) => handleChange('lastName', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Doe"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Professional Title</label>
+              <input
+                type="text"
+                value={personalInfo.title}
+                onChange={(e) => handleChange('title', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Software Engineer"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <input
+                type="date"
+                value={personalInfo.dateOfBirth}
+                onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+              <input
+                type="text"
+                value={personalInfo.nationality}
+                onChange={(e) => handleChange('nationality', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="American"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Place of Birth</label>
+              <input
+                type="text"
+                value={personalInfo.placeOfBirth}
+                onChange={(e) => handleChange('placeOfBirth', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="New York, USA"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
+              <input
+                type="url"
+                value={personalInfo.photo}
+                onChange={(e) => handleChange('photo', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/photo.jpg"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+            <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="font-medium text-gray-700">Name:</span>
+              <span className="ml-2 text-gray-600">
+                {personalInfo.firstName || personalInfo.lastName 
+                  ? `${personalInfo.firstName} ${personalInfo.lastName}` 
+                  : <span className="text-gray-400 italic">Not provided</span>
+                }
+              </span>
+            </div>
+            <div>
+              <span className="font-medium text-gray-700">Title:</span>
+              <span className="ml-2 text-gray-600">{personalInfo.title || <span className="text-gray-400 italic">Not provided</span>}</span>
+            </div>
+            {personalInfo.dateOfBirth && (
+              <div>
+                <span className="font-medium text-gray-700">Date of Birth:</span>
+                <span className="ml-2 text-gray-600">{new Date(personalInfo.dateOfBirth).toLocaleDateString()}</span>
+              </div>
+            )}
+            {personalInfo.nationality && (
+              <div>
+                <span className="font-medium text-gray-700">Nationality:</span>
+                <span className="ml-2 text-gray-600">{personalInfo.nationality}</span>
+              </div>
+            )}
+            {personalInfo.placeOfBirth && (
+              <div>
+                <span className="font-medium text-gray-700">Place of Birth:</span>
+                <span className="ml-2 text-gray-600">{personalInfo.placeOfBirth}</span>
+              </div>
+            )}
+            {personalInfo.photo && (
+              <div className="md:col-span-2">
+                <span className="font-medium text-gray-700">Photo:</span>
+                <div className="mt-2">
+                  <img src={personalInfo.photo} alt="Profile" className="w-24 h-24 rounded-full object-cover border-2 border-gray-200" />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </Section>
   );
 }
 
@@ -748,6 +1157,116 @@ function CoursesSection({ profile, updateProfile }: any) {
   );
 }
 
+// Signature Section Component
+function SignatureSection({ profile, updateProfile }: any) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [signature, setSignature] = useState(profile?.signature || {
+    name: '',
+    date: '',
+    place: '',
+    image: ''
+  });
+
+  const handleSave = async () => {
+    await updateProfile({ signature });
+    setIsEditing(false);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setSignature({ ...signature, [field]: value });
+  };
+
+  return (
+    <Section title="Signature" icon={FileText} onEdit={() => setIsEditing(true)}>
+      {isEditing ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Signature Name</label>
+              <input
+                type="text"
+                value={signature.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="John Doe"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="date"
+                value={signature.date}
+                onChange={(e) => handleChange('date', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Place</label>
+              <input
+                type="text"
+                value={signature.place}
+                onChange={(e) => handleChange('place', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="New York, USA"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Signature Image URL</label>
+              <input
+                type="url"
+                value={signature.image}
+                onChange={(e) => handleChange('image', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="https://example.com/signature.png"
+              />
+            </div>
+          </div>
+
+          {signature.image && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <img src={signature.image} alt="Signature" className="h-16 object-contain" />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2">
+            <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+            <button onClick={() => setIsEditing(false)} className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Cancel</button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {signature.image ? (
+            <div>
+              <img src={signature.image} alt="Signature" className="h-16 object-contain mb-2" />
+              <div className="text-sm text-gray-700">
+                {signature.name && <div><span className="font-medium">Name:</span> {signature.name}</div>}
+                {signature.date && <div><span className="font-medium">Date:</span> {new Date(signature.date).toLocaleDateString()}</div>}
+                {signature.place && <div><span className="font-medium">Place:</span> {signature.place}</div>}
+              </div>
+            </div>
+          ) : (
+            <div className="text-gray-600">
+              {signature.name || signature.date || signature.place ? (
+                <div className="space-y-1 text-sm">
+                  {signature.name && <div><span className="font-medium">Name:</span> {signature.name}</div>}
+                  {signature.date && <div><span className="font-medium">Date:</span> {new Date(signature.date).toLocaleDateString()}</div>}
+                  {signature.place && <div><span className="font-medium">Place:</span> {signature.place}</div>}
+                  <p className="text-gray-400 italic mt-2">Add signature image URL to display signature</p>
+                </div>
+              ) : (
+                <p className="text-gray-400 italic">Add your signature details</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </Section>
+  );
+}
+
 // Reusable Section Wrapper
 function Section({ title, icon: Icon, children, onEdit, onAdd }: any) {
   return (
@@ -764,5 +1283,22 @@ function Section({ title, icon: Icon, children, onEdit, onAdd }: any) {
       </div>
       {children}
     </div>
+  );
+}
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <ProtectedRoute>
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-4 text-gray-600">Loading profile...</p>
+          </div>
+        </div>
+      </ProtectedRoute>
+    }>
+      <ProfilePageContent />
+    </Suspense>
   );
 }

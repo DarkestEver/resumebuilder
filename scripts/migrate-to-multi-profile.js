@@ -10,10 +10,27 @@
  */
 
 const mongoose = require('mongoose');
-require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+
+// Load environment variables from backend/.env
+const envPath = path.join(__dirname, '../backend/.env');
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, 'utf-8');
+  envContent.split('\n').forEach(line => {
+    const match = line.match(/^([^=:#]+)=(.*)$/);
+    if (match) {
+      const key = match[1].trim();
+      const value = match[2].trim();
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  });
+}
 
 // MongoDB Connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/resume-builder';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/profilebuilder';
 
 // Import models (we'll define schemas inline to avoid import issues)
 const ProfileSchema = new mongoose.Schema({

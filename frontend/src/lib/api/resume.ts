@@ -17,6 +17,18 @@ export interface UpdateResumeData {
   title?: string;
   templateId?: string;
   customizations?: any;
+  data?: {
+    personalInfo?: any;
+    contact?: any;
+    summary?: string;
+    experience?: any[];
+    education?: any[];
+    skills?: any[];
+    projects?: any[];
+    certifications?: any[];
+    languages?: any[];
+    achievements?: any[];
+  };
   visibility?: string;
   password?: string;
   expiresAt?: Date;
@@ -31,6 +43,19 @@ export interface Resume {
   title: string;
   name?: string;
   templateId: string;
+  data?: {
+    personalInfo?: any;
+    contact?: any;
+    summary?: string;
+    experience?: any[];
+    education?: any[];
+    skills?: any[];
+    projects?: any[];
+    certifications?: any[];
+    languages?: any[];
+    achievements?: any[];
+  };
+  lastSyncedAt?: string;
   customizations: any;
   visibility: string;
   shortId: string;
@@ -80,16 +105,38 @@ export const deleteResume = async (id: string): Promise<void> => {
 };
 
 export const exportResumePDF = async (id: string): Promise<void> => {
-  const response = await apiClient.get(`/resumes/${id}/export-pdf`, {
-    responseType: 'blob',
-  });
-  const url = window.URL.createObjectURL(new Blob([response.data]));
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', `resume.pdf`);
-  document.body.appendChild(link);
-  link.click();
-  link.parentNode?.removeChild(link);
+  try {
+    const response = await apiClient.get(`/resumes/${id}/export-pdf`, {
+      responseType: 'blob',
+    });
+    
+    // Check if response is actually a blob
+    if (!(response.data instanceof Blob)) {
+      throw new Error('Invalid PDF response from server');
+    }
+    
+    // Check if it's an error response disguised as blob
+    if (response.data.type === 'application/json') {
+      const text = await response.data.text();
+      const errorData = JSON.parse(text);
+      throw new Error(errorData.message || 'Failed to generate PDF');
+    }
+    
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `resume-${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error('Export PDF error:', error);
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Failed to export PDF. Please try again.');
+  }
 };
 
 export const resumeApi = {
@@ -184,5 +231,51 @@ export const resumeApi = {
       jobDescription,
     });
     return response.data;
+  },
+
+  /**
+   * Sync resume data from profile
+   */
+  syncFromProfile: async (id: string) => {
+    const response = await apiClient.post(`/resumes/${id}/sync-from-profile`);
+    return response.data;
+  },
+
+  /**
+   * Export resume as PDF
+   */
+  exportPDF: async (id: string): Promise<void> => {
+    try {
+      const response = await apiClient.get(`/resumes/${id}/export-pdf`, {
+        responseType: 'blob',
+      });
+      
+      // Check if response is actually a blob
+      if (!(response.data instanceof Blob)) {
+        throw new Error('Invalid PDF response from server');
+      }
+      
+      // Check if it's an error response disguised as blob
+      if (response.data.type === 'application/json') {
+        const text = await response.data.text();
+        const errorData = JSON.parse(text);
+        throw new Error(errorData.message || 'Failed to generate PDF');
+      }
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `resume-${id}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export PDF error:', error);
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Failed to export PDF. Please try again.');
+    }
   },
 };

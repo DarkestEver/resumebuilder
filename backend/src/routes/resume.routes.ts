@@ -35,6 +35,7 @@ router.delete('/:id', ResumeController.deleteResume);
 // Additional operations
 router.post('/:id/duplicate', ResumeController.duplicateResume);
 router.put('/:id/visibility', ResumeController.updateVisibility);
+router.post('/:id/sync-from-profile', ResumeController.syncFromProfile);
 
 // PDF generation (Phase 7)
 router.get('/:id/pdf', ResumeController.generatePDF);

@@ -43,18 +43,26 @@ router.get('/:id/export-pdf', authenticate, async (req: Request, res: Response) 
       return;
     }
 
+    console.log('Profile personal info:', JSON.stringify(profile.personalInfo, null, 2));
+    console.log('Profile contact:', JSON.stringify(profile.contact, null, 2));
+
     // Prepare resume data with proper type conversion
     const resumeData: ResumeData = {
-      personalInfo: profile.personalInfo,
+      personalInfo: {
+        firstName: profile.personalInfo?.firstName || '',
+        lastName: profile.personalInfo?.lastName || '',
+        title: profile.personalInfo?.title || '',
+        photo: profile.personalInfo?.photo || '',
+      },
       contact: {
         email: profile.contact?.email,
         phone: profile.contact?.phone,
-        address: profile.contact?.address ? {
-          city: profile.contact.city,
-          country: profile.contact.country,
-          zipCode: profile.contact.postalCode,
-        } : undefined,
+        alternatePhone: profile.contact?.alternatePhone,
+        address: profile.contact?.address,
         website: profile.contact?.website,
+        linkedin: profile.contact?.linkedin,
+        github: profile.contact?.github,
+        portfolio: profile.contact?.portfolio,
       },
       summary: profile.summary,
       experience: profile.experience?.map(exp => ({
@@ -86,6 +94,18 @@ router.get('/:id/export-pdf', authenticate, async (req: Request, res: Response) 
     };
 
     // Apply customizations (hide sections, etc.)
+    if (resume.customizations?.hiddenSections) {
+      const hiddenSections = resume.customizations.hiddenSections;
+      if (hiddenSections.includes('summary')) resumeData.summary = undefined;
+      if (hiddenSections.includes('experience')) resumeData.experience = undefined;
+      if (hiddenSections.includes('education')) resumeData.education = undefined;
+      if (hiddenSections.includes('skills')) resumeData.skills = undefined;
+      if (hiddenSections.includes('projects')) resumeData.projects = undefined;
+      if (hiddenSections.includes('languages')) resumeData.languages = undefined;
+      if (hiddenSections.includes('certifications')) resumeData.certifications = undefined;
+    }
+    
+    // Also check legacy sections visibility
     if (resume.customizations?.sections?.visibility) {
       const visibility = resume.customizations.sections.visibility;
       if (visibility.summary === false) resumeData.summary = undefined;
@@ -99,11 +119,34 @@ router.get('/:id/export-pdf', authenticate, async (req: Request, res: Response) 
     // Select PDF generator based on template
     let pdfStream;
     const templateId = resume.templateId || 'modern';
-    switch (templateId) {
+    
+    // Map template IDs to available PDF generators
+    // All templates currently use modern PDF generator
+    // TODO: Add more PDF templates to match frontend templates
+    switch (templateId.toLowerCase()) {
       case 'classic':
+      case 'executive':
+      case 'corporate':
+      case 'senior-executive':
         pdfStream = generateClassicPDF(resumeData);
         break;
       case 'modern':
+      case 'minimal':
+      case 'minimalist':
+      case 'creative':
+      case 'technical':
+      case 'academic':
+      case 'developer-pro':
+      case 'sales-executive':
+      case 'startup':
+      case 'healthcare':
+      case 'legal':
+      case 'marketing':
+      case 'student':
+      case 'two-column-modern':
+      case 'one-page-compact':
+      case 'timeline':
+      case 'project-based':
       default:
         pdfStream = generateModernPDF(resumeData);
     }

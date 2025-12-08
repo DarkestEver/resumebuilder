@@ -3,37 +3,61 @@ import { TemplateProps } from './types';
 
 const MinimalTemplate: React.FC<TemplateProps> = ({ profile }) => {
   return (
-    <div className="w-full bg-white p-12" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', color: '#000' }}>
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-light mb-1">
+    <div className="w-full bg-white p-10" style={{ fontFamily: 'system-ui, -apple-system, sans-serif', color: '#000000' }}>
+      {/* Header - ATS Optimized */}
+      <div className="mb-6 pb-4 border-b border-gray-800">
+        <h1 className="text-3xl font-semibold mb-1">
           {profile.personalInfo?.firstName} {profile.personalInfo?.lastName}
         </h1>
-        <p className="text-xs uppercase tracking-widest text-gray-600 mb-4">
-          {profile.personalInfo?.title || 'Professional'}
-        </p>
-        <div className="flex gap-4 text-xs text-gray-600">
-          {profile.contact?.email && <span>{profile.contact.email}</span>}
-          {profile.contact?.phone && <span>{profile.contact.phone}</span>}
+        {profile.personalInfo?.title && (
+          <p className="text-base mb-2">{profile.personalInfo.title}</p>
+        )}
+        <div className="text-sm space-y-1">
+          {profile.contact?.email && <div>Email: {profile.contact.email}</div>}
+          {profile.contact?.phone && <div>Phone: {profile.contact.phone}</div>}
+          {profile.contact?.address && (
+            <div>
+              Location: {typeof profile.contact.address === 'string'
+                ? profile.contact.address
+                : `${profile.contact.address?.city}, ${profile.contact.address?.country}`}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary - ATS Optimized */}
       {profile.summary && (
-        <div className="mb-8 pb-8 border-b border-gray-300">
-          <p className="text-sm leading-relaxed text-gray-800">{profile.summary}</p>
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            PROFESSIONAL SUMMARY
+          </h2>
+          <p className="text-sm leading-relaxed">{profile.summary}</p>
         </div>
       )}
 
-      {/* Experience */}
+      {/* Skills - ATS Optimized */}
+      {profile.skills && profile.skills.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            SKILLS
+          </h2>
+          <p className="text-sm leading-relaxed">
+            {profile.skills.map((skill: any) => typeof skill === 'string' ? skill : skill.name || '').join(' • ')}
+          </p>
+        </div>
+      )}
+
+      {/* Experience - ATS Optimized */}
       {profile.experience && profile.experience.length > 0 && (
-        <div className="mb-8 pb-8 border-b border-gray-300">
-          <h2 className="text-xs uppercase tracking-widest font-semibold mb-4">Experience</h2>
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            PROFESSIONAL EXPERIENCE
+          </h2>
           {profile.experience.map((exp: any, idx: number) => (
-            <div key={idx} className="mb-5">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">{exp.title}</span>
-                <span className="text-xs text-gray-500">
+            <div key={idx} className="mb-4">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-sm font-semibold">{exp.title}</span>
+                <span className="text-sm whitespace-nowrap ml-4">
                   {exp.startDate && typeof exp.startDate === 'string'
                     ? exp.startDate.slice(0, 4)
                     : exp.startDate instanceof Date
@@ -47,22 +71,24 @@ const MinimalTemplate: React.FC<TemplateProps> = ({ profile }) => {
                     : 'Present'}
                 </span>
               </div>
-              <p className="text-xs text-gray-600">{exp.company}</p>
-              <p className="text-xs mt-2 text-gray-700">{exp.description}</p>
+              <p className="text-sm font-medium">{exp.company}</p>
+              <p className="text-sm mt-1 leading-relaxed">{exp.description}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Education */}
+      {/* Education - ATS Optimized */}
       {profile.education && profile.education.length > 0 && (
-        <div className="mb-8 pb-8 border-b border-gray-300">
-          <h2 className="text-xs uppercase tracking-widest font-semibold mb-4">Education</h2>
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            EDUCATION
+          </h2>
           {profile.education.map((edu: any, idx: number) => (
-            <div key={idx} className="mb-4">
-              <div className="flex justify-between mb-1">
-                <span className="text-sm font-medium">{edu.degree}</span>
-                <span className="text-xs text-gray-500">
+            <div key={idx} className="mb-3">
+              <div className="flex justify-between items-start mb-1">
+                <span className="text-sm font-semibold">{edu.degree}</span>
+                <span className="text-sm whitespace-nowrap ml-4">
                   {edu.startDate && typeof edu.startDate === 'string'
                     ? edu.startDate.slice(0, 4)
                     : edu.startDate instanceof Date
@@ -70,36 +96,39 @@ const MinimalTemplate: React.FC<TemplateProps> = ({ profile }) => {
                     : ''}
                 </span>
               </div>
-              <p className="text-xs text-gray-600">{edu.institution}</p>
+              <p className="text-sm">{edu.institution}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Skills & Languages */}
-      <div className="grid grid-cols-2 gap-8">
-        {profile.skills && profile.skills.length > 0 && (
-          <div>
-            <h2 className="text-xs uppercase tracking-widest font-semibold mb-3">Skills</h2>
-            <div className="space-y-2">
-              {profile.skills.map((skill: any, idx: number) => (
-                <p key={idx} className="text-xs">{typeof skill === 'string' ? skill : skill.name || ''}</p>
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Certifications - ATS Optimized */}
+      {profile.certifications && profile.certifications.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            CERTIFICATIONS
+          </h2>
+          {profile.certifications.map((cert: any, idx: number) => (
+            <p key={idx} className="text-sm mb-1">
+              {typeof cert === 'string' ? cert : `${cert.name || ''}${cert.issuer ? ' - ' + cert.issuer : ''}`}
+            </p>
+          ))}
+        </div>
+      )}
 
-        {profile.languages && profile.languages.length > 0 && (
-          <div>
-            <h2 className="text-xs uppercase tracking-widest font-semibold mb-3">Languages</h2>
-            <div className="space-y-2">
-              {profile.languages.map((lang: any, idx: number) => (
-                <p key={idx} className="text-xs">{typeof lang === 'string' ? lang : lang.name || ''}</p>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {/* Languages - ATS Optimized */}
+      {profile.languages && profile.languages.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-semibold mb-2 uppercase border-b border-gray-800 pb-1">
+            LANGUAGES
+          </h2>
+          <p className="text-sm">
+            {profile.languages.map((lang: any) => 
+              typeof lang === 'string' ? lang : `${lang.name || ''} (${lang.proficiency || ''})`
+            ).join(', ')}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

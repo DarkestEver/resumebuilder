@@ -11,6 +11,7 @@ export interface IProfile extends Document {
     photo?: string;
     dateOfBirth?: Date;
     nationality?: string;
+    placeOfBirth?: string;
   };
   
   // Soft delete
@@ -20,11 +21,27 @@ export interface IProfile extends Document {
   contact: {
     email: string;
     phone?: string;
-    address?: string;
-    city?: string;
-    country?: string;
-    postalCode?: string;
+    alternatePhone?: string;
+    address?: {
+      street?: string;
+      apartment?: string;
+      city?: string;
+      state?: string;
+      country?: string;
+      zipCode?: string;
+    };
     website?: string;
+    linkedin?: string;
+    github?: string;
+    portfolio?: string;
+  };
+
+  // Signature
+  signature?: {
+    name?: string;
+    date?: Date;
+    place?: string;
+    image?: string;
   };
   
   // Professional Summary
@@ -176,16 +193,32 @@ const ProfileSchema: Schema = new Schema(
       photo: String,
       dateOfBirth: Date,
       nationality: String,
+      placeOfBirth: String,
     },
     
     contact: {
       email: { type: String, required: true },
       phone: String,
-      address: String,
-      city: String,
-      country: String,
-      postalCode: String,
+      alternatePhone: String,
+      address: {
+        street: String,
+        apartment: String,
+        city: String,
+        state: String,
+        country: String,
+        zipCode: String,
+      },
       website: String,
+      linkedin: String,
+      github: String,
+      portfolio: String,
+    },
+
+    signature: {
+      name: String,
+      date: Date,
+      place: String,
+      image: String,
     },
     
     summary: String,

@@ -1,7 +1,6 @@
 import { Request, Response } from 'express';
 import { ProfileCollection } from '../models/ProfileCollection.model';
 import { Resume } from '../models/Resume.model';
-import mongoose from 'mongoose';
 
 /**
  * Profile Collection Controller
@@ -414,10 +413,7 @@ export const profileCollectionController = {
       }
 
       // Create duplicate
-      const duplicateData = originalProfile.toObject();
-      delete duplicateData._id;
-      delete duplicateData.createdAt;
-      delete duplicateData.updatedAt;
+      const { _id, createdAt, updatedAt, ...duplicateData } = originalProfile.toObject();
 
       const newProfile = new ProfileCollection({
         ...duplicateData,

@@ -5,50 +5,63 @@ const ClassicTemplate: React.FC<TemplateProps> = ({ profile, customizations }) =
   const fontFamily = customizations?.font?.family || 'Georgia, serif';
 
   return (
-    <div className="w-full bg-white p-12" style={{ fontFamily, color: '#000' }}>
-      {/* Header */}
-      <div className="text-center border-b-2 border-black pb-6 mb-8">
+    <div className="w-full bg-white p-10" style={{ fontFamily, color: '#000000' }}>
+      {/* Header - ATS Optimized */}
+      <div className="pb-4 mb-6 border-b-2 border-black">
         <h1 className="text-3xl font-bold mb-1">
           {profile.personalInfo?.firstName} {profile.personalInfo?.lastName}
         </h1>
-        <div className="flex justify-center gap-6 text-sm">
-          {profile.contact?.email && <span>{profile.contact.email}</span>}
-          {profile.contact?.phone && <span>{profile.contact.phone}</span>}
+        {profile.personalInfo?.title && (
+          <p className="text-base mb-2">{profile.personalInfo.title}</p>
+        )}
+        <div className="text-sm space-y-1">
+          {profile.contact?.email && <div>Email: {profile.contact.email}</div>}
+          {profile.contact?.phone && <div>Phone: {profile.contact.phone}</div>}
           {profile.contact?.address && (
-            <span>
-              {typeof profile.contact.address === 'string'
+            <div>
+              Location: {typeof profile.contact.address === 'string'
                 ? profile.contact.address
                 : `${profile.contact.address?.city}, ${profile.contact.address?.country}`}
-            </span>
+            </div>
           )}
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Summary - ATS Optimized */}
       {profile.summary && (
         <div className="mb-6">
-          <h2 className="text-sm font-bold uppercase tracking-wide mb-2">Professional Summary</h2>
+          <h2 className="text-base font-bold uppercase border-b border-black pb-1 mb-2">PROFESSIONAL SUMMARY</h2>
           <p className="text-sm leading-relaxed">{profile.summary}</p>
         </div>
       )}
 
-      {/* Experience */}
+      {/* Skills - ATS Optimized */}
+      {profile.skills && profile.skills.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-base font-bold uppercase border-b border-black pb-1 mb-2">SKILLS</h2>
+          <p className="text-sm leading-relaxed">
+            {profile.skills.map((skill: any) => typeof skill === 'string' ? skill : skill.name || '').join(' • ')}
+          </p>
+        </div>
+      )}
+
+      {/* Experience - ATS Optimized */}
       {profile.experience && profile.experience.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-sm font-bold uppercase tracking-wide border-b border-black pb-1 mb-3">
-            Professional Experience
+          <h2 className="text-base font-bold uppercase border-b border-black pb-1 mb-2">
+            PROFESSIONAL EXPERIENCE
           </h2>
           {profile.experience.map((exp, idx) => (
             <div key={idx} className="mb-4">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-start mb-1">
                 <p className="font-bold text-sm">{exp.title}</p>
-                <span className="text-xs">
+                <span className="text-sm whitespace-nowrap ml-4">
                   {exp.startDate && typeof exp.startDate === 'string'
                     ? exp.startDate.slice(0, 4)
                     : exp.startDate instanceof Date
                     ? exp.startDate.getFullYear()
                     : ''}{' '}
-                  -{' '}
+                  - {' '}
                   {exp.endDate && typeof exp.endDate === 'string'
                     ? exp.endDate.slice(0, 4)
                     : exp.endDate instanceof Date
@@ -56,8 +69,8 @@ const ClassicTemplate: React.FC<TemplateProps> = ({ profile, customizations }) =
                     : 'Present'}
                 </span>
               </div>
-              <p className="text-sm italic">{exp.company}</p>
-              <p className="text-xs mt-1 leading-relaxed">{exp.description}</p>
+              <p className="text-sm font-semibold">{exp.company}</p>
+              <p className="text-sm mt-1 leading-relaxed">{exp.description}</p>
             </div>
           ))}
         </div>

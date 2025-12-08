@@ -7,13 +7,30 @@ export interface Resume {
   name?: string;
   title?: string;
   templateId: string;
+  data?: {
+    personalInfo?: any;
+    contact?: any;
+    summary?: string;
+    experience?: any[];
+    education?: any[];
+    skills?: any[];
+    projects?: any[];
+    certifications?: any[];
+    languages?: any[];
+    achievements?: any[];
+  };
+  lastSyncedAt?: string;
   customizations?: {
     colors?: { primary?: string; secondary?: string; accent?: string };
     fonts?: { heading?: string; body?: string };
-    layout?: 'single-column' | 'two-column';
+    layout?: 'single-column' | 'two-column' | 'two-column-wide' | 'sidebar-left' | 'sidebar-right' | 'three-column' | 'modern-card' | 'timeline' | 'compact-dense';
     hiddenSections?: string[];
   };
   visibility?: string;
+  viewCount?: number;
+  downloadCount?: number;
+  shortId?: string;
+  slug?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -27,7 +44,7 @@ interface ResumeStore {
 
   fetchResumes: () => Promise<void>;
   selectResume: (id: string) => void;
-  createResume: (data: { title?: string; name?: string; templateId: string }) => Promise<void>;
+  createResume: (data: { title?: string; name?: string; templateId: string; slug?: string }) => Promise<Resume>;
   updateResume: (id: string, data: Partial<Resume>) => Promise<void>;
   deleteResume: (id: string) => Promise<void>;
   exportPDF: (id: string) => Promise<void>;
@@ -68,11 +85,13 @@ export const resumeStore = create<ResumeStore>((set) => ({
             selectedResume: resume,
             isSaving: false,
           }));
+          return resume;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : 'Failed to create resume',
             isSaving: false,
           });
+          throw error;
         }
       },
 

@@ -84,7 +84,7 @@ export class ResumeController {
       // Generate short ID for public sharing
       const shortId = nanoid();
 
-      // Build resume data
+      // Copy data from profile to resume
       const resumeData: any = {
         userId: req.user.userId,
         profileId: profile._id,
@@ -93,6 +93,20 @@ export class ResumeController {
         visibility: visibility || 'private',
         customizations: customizations || {},
         shortId,
+        // Copy all profile data to resume (editable independently)
+        data: {
+          personalInfo: profile.personalInfo,
+          contact: profile.contact,
+          summary: profile.summary,
+          experience: profile.experience,
+          education: profile.education,
+          skills: profile.skills,
+          projects: profile.projects,
+          certifications: profile.certifications,
+          languages: profile.languages,
+          achievements: profile.achievements,
+        },
+        lastSyncedAt: new Date(),
       };
 
       // Only add slug if provided (to avoid duplicate key errors with sparse index)
@@ -137,13 +151,17 @@ export class ResumeController {
       }
 
       // Update allowed fields
-      const { title, templateId, visibility, customizations, tailoredFor, slug } = req.body;
+      const { title, templateId, visibility, customizations, tailoredFor, slug, data } = req.body;
 
       if (title) resume.title = title;
       if (templateId) resume.templateId = templateId;
       if (visibility) resume.visibility = visibility;
       if (customizations) resume.customizations = customizations;
       if (tailoredFor) resume.tailoredFor = tailoredFor;
+      if (data) {
+        resume.data = data;
+        resume.lastSyncedAt = new Date();
+      }
       if (slug !== undefined) {
         // Validate slug format (alphanumeric, hyphens, underscores only)
         if (slug && !/^[a-zA-Z0-9_-]+$/.test(slug)) {
@@ -438,6 +456,75 @@ export class ResumeController {
             username: user.username,
           }
         },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Sync resume data from profile
+   */
+  static async syncFromProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Not authenticated', 401);
+      }
+
+      const { id } = req.params;
+
+      const resume = await Resume.findOne({ 
+        _id: id,
+        userId: req.user.userId,
+        deletedAt: null,
+      });
+
+      if (!resume) {
+        throw new AppError('Resume not found', 404);
+      }
+
+      // Get profile data - try resume's profileId first, then user's default profile
+      let profile = resume.profileId ? await Profile.findById(resume.profileId) : null;
+      
+      if (!profile) {
+        // Fallback to user's default profile
+        profile = await Profile.findOne({ 
+          userId: req.user.userId,
+          deletedAt: null,
+        }).sort({ createdAt: 1 });
+      }
+
+      if (!profile) {
+        throw new AppError('No profile found. Please create a profile first.', 404);
+      }
+
+      // Update resume's profileId reference if it was using fallback
+      if (!resume.profileId || resume.profileId.toString() !== profile._id.toString()) {
+        resume.profileId = profile._id;
+      }
+
+      // Update resume data with profile data
+      resume.data = {
+        personalInfo: profile.personalInfo,
+        contact: profile.contact,
+        summary: profile.summary,
+        experience: profile.experience,
+        education: profile.education,
+        skills: profile.skills,
+        projects: profile.projects,
+        certifications: profile.certifications,
+        languages: profile.languages,
+        achievements: profile.achievements,
+      };
+      resume.lastSyncedAt = new Date();
+      await resume.save();
+
+      logger.info(`Resume ${resume._id} synced from profile ${profile._id}`);
+
+      res.status(200).json({
+        success: true,
+        message: 'Resume data synced from profile successfully',
+        data: { resume },
       });
     } catch (error) {
       next(error);

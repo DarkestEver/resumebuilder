@@ -28,6 +28,7 @@ import {
   Upload,
   Sparkles,
   Target,
+  User,
   ArrowRight,
   Share2,
   Link as LinkIcon
@@ -159,7 +160,7 @@ function DashboardContent() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/profiles"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:shadow-lg hover:scale-105 transition-all"
                 >
                   <FileText className="w-4 h-4" />
                   My Profiles
@@ -170,12 +171,6 @@ function DashboardContent() {
                 >
                   <Upload className="w-4 h-4" />
                   Upload CV
-                </Link>
-                <Link
-                  href="/profile"
-                  className="hidden sm:block text-sm text-gray-700 hover:text-gray-900 font-medium"
-                >
-                  Profile
                 </Link>
                 <button
                   onClick={() => authStore.getState().logout()}
@@ -282,6 +277,53 @@ function DashboardContent() {
               </div>
               <ArrowRight className="absolute bottom-8 right-8 w-6 h-6 text-purple-600 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0" />
             </Link>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Link
+                href="/profile"
+                className="group p-6 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl hover:shadow-md transition-all border-2 border-transparent hover:border-purple-300"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-purple-500 rounded-lg">
+                    <User className="w-6 h-6 text-white" />
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-purple-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Build Profile</h3>
+                <p className="text-sm text-gray-600">Complete your professional profile</p>
+              </Link>
+
+              <Link
+                href="/upload-cv"
+                className="group p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-xl hover:shadow-md transition-all border-2 border-transparent hover:border-green-300"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-green-500 rounded-lg">
+                    <Upload className="w-6 h-6 text-white" />
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-green-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Upload CV</h3>
+                <p className="text-sm text-gray-600">Import profile data from your existing CV</p>
+              </Link>
+
+              <Link
+                href="/templates"
+                className="group p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl hover:shadow-md transition-all border-2 border-transparent hover:border-blue-300"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <div className="p-3 bg-blue-500 rounded-lg">
+                    <FileText className="w-6 h-6 text-white" />
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Browse Templates</h3>
+                <p className="text-sm text-gray-600">Choose from 20+ professional designs</p>
+              </Link>
+            </div>
           </div>
 
           {/* All Features Section */}

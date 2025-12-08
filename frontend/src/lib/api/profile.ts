@@ -12,12 +12,17 @@ export interface ProfileData {
     lastName?: string;
     title?: string;
     photo?: string;
+    dateOfBirth?: string | Date;
+    nationality?: string;
+    placeOfBirth?: string;
   };
   contact?: {
     email?: string;
     phone?: string;
+    alternatePhone?: string;
     address?: {
       street?: string;
+      apartment?: string;
       city?: string;
       state?: string;
       country?: string;
@@ -26,6 +31,13 @@ export interface ProfileData {
     website?: string;
     linkedin?: string;
     github?: string;
+    portfolio?: string;
+  };
+  signature?: {
+    name?: string;
+    date?: string | Date;
+    place?: string;
+    image?: string;  // Base64 or URL to signature image
   };
   summary?: string;
   experience?: Array<{
@@ -96,6 +108,7 @@ export interface ProfileData {
     portfolio?: string;
     blog?: string;
     twitter?: string;
+    linkedin?: string;
     other?: string[];
   };
   interests?: string[];

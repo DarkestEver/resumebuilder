@@ -59,7 +59,7 @@ export default function Header() {
                   Dashboard
                 </Link>
                 <Link href="/profile" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
-                  My Profile
+                  Profile
                 </Link>
                 <Link href="/resume" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
                   Resumes

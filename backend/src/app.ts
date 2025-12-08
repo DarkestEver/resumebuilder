@@ -10,7 +10,6 @@ import { errorHandler } from './middleware/errorHandler';
 import authRoutes from './routes/auth.routes';
 import userRoutes from './routes/user.routes';
 import profileRoutes from './routes/profile.routes';
-import profileCollectionRoutes from './routes/profileCollection.routes';
 import resumeRoutes from './routes/resume.routes';
 import cvUploadRoutes from './routes/cvUpload.routes';
 import pdfRoutes from './routes/pdf.routes';
@@ -51,7 +50,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Serve static files (uploaded photos) with CORS headers
-app.use('/uploads', (req, res, next) => {
+app.use('/uploads', (_req, res, next) => {
   res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
   res.setHeader('Access-Control-Allow-Origin', '*');
   next();
@@ -71,7 +70,6 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/profiles', profileRoutes);
-app.use('/api/profile-collections', profileCollectionRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/cv', cvUploadRoutes);
 app.use('/api/resumes', pdfRoutes);

@@ -7,6 +7,22 @@ export interface IResume extends Document {
   title: string;
   templateId: string;
   
+  // Resume-specific data (copied from profile, can be edited independently)
+  data?: {
+    personalInfo?: any;
+    contact?: any;
+    summary?: string;
+    experience?: any[];
+    education?: any[];
+    skills?: any[];
+    projects?: any[];
+    certifications?: any[];
+    languages?: any[];
+    achievements?: any[];
+  };
+  
+  lastSyncedAt?: Date; // Track when data was last synced from profile
+  
   // Customizations override profile data
   customizations: {
     colors?: {
@@ -72,7 +88,7 @@ const ResumeSchema: Schema = new Schema(
     },
     profileId: {
       type: Schema.Types.ObjectId,
-      ref: 'ProfileCollection',
+      ref: 'Profile',
       required: true,
       index: true,
     },
@@ -89,10 +105,27 @@ const ResumeSchema: Schema = new Schema(
       default: 'minimalist',
     },
     
+    // Resume-specific data (editable copy from profile)
+    data: {
+      personalInfo: Schema.Types.Mixed,
+      contact: Schema.Types.Mixed,
+      summary: String,
+      experience: [Schema.Types.Mixed],
+      education: [Schema.Types.Mixed],
+      skills: [Schema.Types.Mixed],
+      projects: [Schema.Types.Mixed],
+      certifications: [Schema.Types.Mixed],
+      languages: [Schema.Types.Mixed],
+      achievements: [Schema.Types.Mixed],
+    },
+    
+    lastSyncedAt: Date,
+    
     customizations: {
       colors: {
         primary: String,
         secondary: String,
+        accent: String,
         text: String,
       },
       fonts: {
@@ -100,15 +133,9 @@ const ResumeSchema: Schema = new Schema(
         body: String,
       },
       layout: {
-        spacing: {
-          type: String,
-          enum: ['compact', 'normal', 'relaxed'],
-        },
-        columns: {
-          type: Number,
-          enum: [1, 2],
-        },
+        type: Schema.Types.Mixed, // Allow string or object for flexibility
       },
+      hiddenSections: [String], // Array of section IDs to hide
       sections: {
         order: [String],
         visibility: Schema.Types.Mixed,
