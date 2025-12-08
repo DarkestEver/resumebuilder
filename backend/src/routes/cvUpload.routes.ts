@@ -23,19 +23,13 @@ const storage = multer.diskStorage({
 });
 
 const fileFilter = (_req: any, file: any, cb: any) => {
-  const allowedMimes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-    'image/jpeg',
-    'image/png',
-  ];
+  // Only allow PDF files
+  const allowedMimes = ['application/pdf'];
 
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type'), false);
+    cb(new Error('Only PDF files are supported'), false);
   }
 };
 
@@ -69,13 +63,20 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
       return;
     }
 
+    const { uploadTarget, uploadMode, profileId, resumeId, newProfileName, newResumeTitle } = req.body;
+
     const result = await cvUploadController.uploadAndParseCv(
       req.user.userId,
       req.file.path,
       req.file.mimetype,
-      req.body.profileId,
-      req.body.createNew === 'true' || req.body.createNew === true,
-      req.body.profileName
+      {
+        uploadTarget: uploadTarget as 'profile' | 'resume',
+        uploadMode: uploadMode as 'update' | 'create',
+        profileId,
+        resumeId,
+        newProfileName,
+        newResumeTitle,
+      }
     );
 
     res.json({

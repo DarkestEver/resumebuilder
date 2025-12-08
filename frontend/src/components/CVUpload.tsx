@@ -8,7 +8,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { profileStore } from '@/stores/profileStore';
 import { authStore } from '@/stores/authStore';
+import { resumeStore } from '@/stores/resumeStore';
 import { toast } from 'sonner';
+import { FileText, Upload, X } from 'lucide-react';
 
 interface CVUploadProps {
   onSuccess?: () => void;
@@ -20,25 +22,46 @@ interface Profile {
   isDefault: boolean;
 }
 
+interface Resume {
+  _id: string;
+  title: string;
+  templateId: string;
+}
+
+type UploadTarget = 'profile' | 'resume';
+type UploadMode = 'update' | 'create';
+
 const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
   const [dragActive, setDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [progress, setProgress] = useState(0);
+  
+  // Target selection
+  const [uploadTarget, setUploadTarget] = useState<UploadTarget>('profile');
+  const [uploadMode, setUploadMode] = useState<UploadMode>('update');
+  
+  // Profile options
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfileId, setSelectedProfileId] = useState<string>('');
-  const [createNewProfile, setCreateNewProfile] = useState(false);
   const [newProfileName, setNewProfileName] = useState('');
+  
+  // Resume options
+  const [resumes, setResumes] = useState<Resume[]>([]);
+  const [selectedResumeId, setSelectedResumeId] = useState<string>('');
+  const [newResumeTitle, setNewResumeTitle] = useState('');
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { updateProfile } = profileStore();
   const { accessToken } = authStore();
 
-  const supportedFormats = ['pdf', 'doc', 'docx', 'txt', 'jpg', 'jpeg', 'png'];
+  const supportedFormats = ['pdf']; // PDF only
   const maxFileSize = 10 * 1024 * 1024; // 10MB
 
   useEffect(() => {
     fetchProfiles();
+    fetchResumes();
   }, []);
 
   const fetchProfiles = async () => {
@@ -62,6 +85,25 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
     }
   };
 
+  const fetchResumes = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/resumes`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setResumes(data.data);
+        if (data.data.length > 0) {
+          setSelectedResumeId(data.data[0]._id);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch resumes:', error);
+    }
+  };
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -75,7 +117,7 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
   const validateFile = (file: File): string | null => {
     const ext = file.name.split('.').pop()?.toLowerCase();
     if (!ext || !supportedFormats.includes(ext)) {
-      return `Invalid format. Supported: ${supportedFormats.join(', ')}`;
+      return `Invalid format. Only PDF files are supported.`;
     }
     if (file.size > maxFileSize) {
       return 'File size exceeds 10MB limit';
@@ -91,10 +133,29 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
       return;
     }
 
-    if (!createNewProfile && !selectedProfileId) {
-      setError('Please select a profile or create a new one');
-      toast.error('Please select a profile');
-      return;
+    // Validate selection based on target and mode
+    if (uploadTarget === 'profile') {
+      if (uploadMode === 'update' && !selectedProfileId) {
+        setError('Please select a profile to update');
+        toast.error('Please select a profile to update');
+        return;
+      }
+      if (uploadMode === 'create' && !newProfileName.trim()) {
+        setError('Please enter a name for the new profile');
+        toast.error('Please enter a profile name');
+        return;
+      }
+    } else if (uploadTarget === 'resume') {
+      if (uploadMode === 'update' && !selectedResumeId) {
+        setError('Please select a resume to update');
+        toast.error('Please select a resume to update');
+        return;
+      }
+      if (uploadMode === 'create' && !newResumeTitle.trim()) {
+        setError('Please enter a title for the new resume');
+        toast.error('Please enter a resume title');
+        return;
+      }
     }
 
     setUploading(true);
@@ -103,12 +164,22 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
 
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('uploadTarget', uploadTarget);
+    formData.append('uploadMode', uploadMode);
     
-    if (createNewProfile) {
-      formData.append('createNew', 'true');
-      formData.append('profileName', newProfileName || `Profile ${profiles.length + 1}`);
-    } else {
-      formData.append('profileId', selectedProfileId);
+    if (uploadTarget === 'profile') {
+      if (uploadMode === 'create') {
+        formData.append('newProfileName', newProfileName);
+      } else {
+        formData.append('profileId', selectedProfileId);
+      }
+    } else if (uploadTarget === 'resume') {
+      if (uploadMode === 'create') {
+        formData.append('newResumeTitle', newResumeTitle);
+        formData.append('profileId', selectedProfileId); // Use selected profile for new resume
+      } else {
+        formData.append('resumeId', selectedResumeId);
+      }
     }
 
     try {
@@ -127,21 +198,23 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           if (response.success && response.data) {
-            // Update profile store with extracted data
-            updateProfile(response.data.extractedData);
             setSuccess(true);
             setProgress(100);
-            toast.success('CV uploaded and parsed successfully!');
             
-            // Refresh profiles list
+            const targetName = uploadTarget === 'profile' ? 'Profile' : 'Resume';
+            const action = uploadMode === 'create' ? 'created' : 'updated';
+            toast.success(`${targetName} ${action} successfully from CV!`);
+            
+            // Refresh data lists
             fetchProfiles();
+            fetchResumes();
             
             // Reset form
             setTimeout(() => {
               setSuccess(false);
               setProgress(0);
-              setCreateNewProfile(false);
               setNewProfileName('');
+              setNewResumeTitle('');
               if (fileInputRef.current) {
                 fileInputRef.current.value = '';
               }
@@ -201,63 +274,134 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
       <div className="bg-white rounded-lg shadow p-8">
         <h2 className="text-2xl font-bold mb-2">Upload Your CV</h2>
         <p className="text-gray-600 mb-6">
-          Upload your resume or CV and we'll automatically extract information to populate your profile.
+          Upload your PDF resume and we'll automatically extract information to create or update your profile or resume.
         </p>
 
-        {/* Profile Selection */}
-        <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Upload to Profile
+        {/* Upload Target Selection */}
+        <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
+          <label className="block text-sm font-semibold text-gray-800 mb-3">
+            What do you want to update?
           </label>
           
-          <div className="space-y-3">
-            {/* Existing Profile Selection */}
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                id="existing-profile"
-                checked={!createNewProfile}
-                onChange={() => setCreateNewProfile(false)}
-                className="w-4 h-4 text-blue-600"
-              />
-              <label htmlFor="existing-profile" className="flex-1">
-                <select
-                  value={selectedProfileId}
-                  onChange={(e) => setSelectedProfileId(e.target.value)}
-                  disabled={createNewProfile}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                >
-                  <option value="">Select existing profile</option>
-                  {profiles.map((profile) => (
-                    <option key={profile._id} value={profile._id}>
-                      {profile.profileName} {profile.isDefault ? '(Default)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-
-            {/* Create New Profile */}
-            <div className="flex items-center gap-3">
-              <input
-                type="radio"
-                id="new-profile"
-                checked={createNewProfile}
-                onChange={() => setCreateNewProfile(true)}
-                className="w-4 h-4 text-blue-600"
-              />
-              <label htmlFor="new-profile" className="flex-1">
-                <input
-                  type="text"
-                  value={newProfileName}
-                  onChange={(e) => setNewProfileName(e.target.value)}
-                  disabled={!createNewProfile}
-                  placeholder="New profile name (e.g., Software Engineer Profile)"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                />
-              </label>
-            </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setUploadTarget('profile')}
+              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+                uploadTarget === 'profile'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-400'
+              }`}
+            >
+              <FileText className="inline-block w-5 h-5 mr-2 mb-1" />
+              Profile
+            </button>
+            <button
+              onClick={() => setUploadTarget('resume')}
+              className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
+                uploadTarget === 'resume'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-400'
+              }`}
+            >
+              <FileText className="inline-block w-5 h-5 mr-2 mb-1" />
+              Resume
+            </button>
           </div>
+        </div>
+
+        {/* Upload Mode Selection */}
+        <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <label className="block text-sm font-semibold text-gray-800 mb-3">
+            {uploadTarget === 'profile' ? 'Profile Selection' : 'Resume Selection'}
+          </label>
+          
+          <div className="flex gap-4 mb-4">
+            <button
+              onClick={() => setUploadMode('update')}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                uploadMode === 'update'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              Update Existing
+            </button>
+            <button
+              onClick={() => setUploadMode('create')}
+              className={`flex-1 px-4 py-2 rounded-lg font-medium transition-all text-sm ${
+                uploadMode === 'create'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
+              }`}
+            >
+              Create New
+            </button>
+          </div>
+
+          {/* Conditional Selection UI */}
+          {uploadTarget === 'profile' && uploadMode === 'update' && (
+            <select
+              value={selectedProfileId}
+              onChange={(e) => setSelectedProfileId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select profile to update</option>
+              {profiles.map((profile) => (
+                <option key={profile._id} value={profile._id}>
+                  {profile.profileName} {profile.isDefault ? '(Default)' : ''}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {uploadTarget === 'profile' && uploadMode === 'create' && (
+            <input
+              type="text"
+              value={newProfileName}
+              onChange={(e) => setNewProfileName(e.target.value)}
+              placeholder="Enter new profile name (e.g., Software Engineer Profile)"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            />
+          )}
+
+          {uploadTarget === 'resume' && uploadMode === 'update' && (
+            <select
+              value={selectedResumeId}
+              onChange={(e) => setSelectedResumeId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select resume to update</option>
+              {resumes.map((resume) => (
+                <option key={resume._id} value={resume._id}>
+                  {resume.title}
+                </option>
+              ))}
+            </select>
+          )}
+
+          {uploadTarget === 'resume' && uploadMode === 'create' && (
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={newResumeTitle}
+                onChange={(e) => setNewResumeTitle(e.target.value)}
+                placeholder="Enter new resume title (e.g., Senior Developer Resume)"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              />
+              <select
+                value={selectedProfileId}
+                onChange={(e) => setSelectedProfileId(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Select base profile</option>
+                {profiles.map((profile) => (
+                  <option key={profile._id} value={profile._id}>
+                    {profile.profileName} {profile.isDefault ? '(Default)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* Drag & Drop Area */}
@@ -277,7 +421,7 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
             type="file"
             className="hidden"
             onChange={handleChange}
-            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+            accept=".pdf"
             disabled={uploading}
           />
 
@@ -299,10 +443,10 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
                 />
               </svg>
               <p className="text-lg font-semibold text-gray-700 mb-1">
-                Drag your CV here or click to upload
+                Drag your PDF here or click to upload
               </p>
               <p className="text-sm text-gray-500">
-                Supported formats: PDF, DOC, DOCX, TXT, JPG, PNG (Max 10MB)
+                PDF only · Max 10MB
               </p>
             </div>
           )}

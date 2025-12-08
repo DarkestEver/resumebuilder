@@ -1,7 +1,17 @@
 import fs from 'fs';
 import { Profile } from '../models/Profile.model';
 import { ProfileCollection } from '../models/ProfileCollection.model';
+import { Resume } from '../models/Resume.model';
 import { cvParsingService } from '../services/cvParsingService';
+
+interface UploadOptions {
+  uploadTarget: 'profile' | 'resume';
+  uploadMode: 'update' | 'create';
+  profileId?: string;
+  resumeId?: string;
+  newProfileName?: string;
+  newResumeTitle?: string;
+}
 
 export const cvUploadController = {
   /**
@@ -11,94 +21,136 @@ export const cvUploadController = {
     userId: string,
     filePath: string,
     mimeType: string,
-    profileId?: string,
-    createNew?: boolean,
-    profileName?: string
+    options: UploadOptions
   ) => {
     try {
       // Read file content
       const fileContent = fs.readFileSync(filePath);
 
-      // Parse CV based on file type
+      // Parse CV - only PDF supported now
       let extractedData: any = {};
 
       if (mimeType === 'application/pdf') {
         extractedData = await cvParsingService.parsePDF(fileContent, filePath);
-      } else if (
-        mimeType === 'application/msword' ||
-        mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      ) {
-        extractedData = await cvParsingService.parseDOC(fileContent);
-      } else if (mimeType === 'text/plain') {
-        extractedData = await cvParsingService.parseTXT(fileContent.toString());
-      } else if (mimeType.startsWith('image/')) {
-        extractedData = await cvParsingService.parseImage(fileContent);
+      } else {
+        throw new Error('Only PDF files are supported');
       }
 
-      // Determine which profile to update/create
-      let profileCollection;
+      const { uploadTarget, uploadMode, profileId, resumeId, newProfileName, newResumeTitle } = options;
 
-      if (createNew) {
-        // Create new profile from CV data
-        const existingCount = await ProfileCollection.countDocuments({
-          userId,
-          deletedAt: null,
-        });
+      let result: any = {};
 
-        profileCollection = new ProfileCollection({
-          userId,
-          profileName:
-            profileName || `Profile ${existingCount + 1}`,
-          isDefault: existingCount === 0,
-          ...extractedData,
-        });
-      } else if (profileId) {
-        // Update existing profile
-        profileCollection = await ProfileCollection.findOne({
-          _id: profileId,
-          userId,
-          deletedAt: null,
-        });
+      // Handle Profile Target
+      if (uploadTarget === 'profile') {
+        let profileCollection;
 
-        if (!profileCollection) {
-          throw new Error('Profile not found');
-        }
+        if (uploadMode === 'create') {
+          // Create new profile from CV data
+          const existingCount = await ProfileCollection.countDocuments({
+            userId,
+            deletedAt: null,
+          });
 
-        Object.assign(profileCollection, extractedData);
-      } else {
-        // Update default profile or create first profile
-        profileCollection = await ProfileCollection.findOne({
-          userId,
-          isDefault: true,
-          deletedAt: null,
-        });
-
-        if (!profileCollection) {
-          // Create first profile
           profileCollection = new ProfileCollection({
             userId,
-            profileName: 'Default Profile',
-            isDefault: true,
+            profileName: newProfileName || `Profile ${existingCount + 1}`,
+            isDefault: existingCount === 0,
             ...extractedData,
           });
-        } else {
+
+          await profileCollection.save();
+
+          result = {
+            type: 'profile',
+            action: 'created',
+            profile: profileCollection,
+          };
+        } else if (uploadMode === 'update' && profileId) {
+          // Update existing profile
+          profileCollection = await ProfileCollection.findOne({
+            _id: profileId,
+            userId,
+            deletedAt: null,
+          });
+
+          if (!profileCollection) {
+            throw new Error('Profile not found');
+          }
+
           Object.assign(profileCollection, extractedData);
+          await profileCollection.save();
+
+          result = {
+            type: 'profile',
+            action: 'updated',
+            profile: profileCollection,
+          };
+        } else {
+          throw new Error('Invalid profile operation');
         }
       }
 
-      await profileCollection.save();
+      // Handle Resume Target
+      else if (uploadTarget === 'resume') {
+        if (uploadMode === 'create') {
+          // Get profile for base data
+          const profile = await ProfileCollection.findOne({
+            _id: profileId,
+            userId,
+            deletedAt: null,
+          });
 
-      // Also update legacy Profile model for backward compatibility
-      let legacyProfile = await Profile.findOne({ userId });
-      if (!legacyProfile) {
-        legacyProfile = new Profile({
-          userId,
-          ...extractedData,
-        });
-      } else {
-        Object.assign(legacyProfile, extractedData);
+          if (!profile) {
+            throw new Error('Profile not found for new resume');
+          }
+
+          // Create new resume with extracted data
+          const resume = new Resume({
+            userId,
+            profileId,
+            title: newResumeTitle || 'Resume',
+            templateId: 'modern-professional',
+            data: extractedData,
+            customizations: {},
+            visibility: 'private',
+          });
+
+          await resume.save();
+
+          result = {
+            type: 'resume',
+            action: 'created',
+            resume,
+          };
+        } else if (uploadMode === 'update' && resumeId) {
+          // Update existing resume
+          const resume = await Resume.findOne({
+            _id: resumeId,
+            userId,
+          });
+
+          if (!resume) {
+            throw new Error('Resume not found');
+          }
+
+          // Update resume data
+          resume.data = {
+            ...resume.data,
+            ...extractedData,
+          };
+          resume.lastSyncedAt = new Date();
+
+          await resume.save();
+
+          result = {
+            type: 'resume',
+            action: 'updated',
+            resume,
+          };
+        } else {
+          throw new Error('Invalid resume operation');
+        }
       }
-      await legacyProfile.save();
 
       // Cleanup uploaded file
       fs.unlinkSync(filePath);
@@ -106,8 +158,7 @@ export const cvUploadController = {
       return {
         success: true,
         extractedData,
-        profile: profileCollection,
-        legacyProfile,
+        ...result,
       };
     } catch (error) {
       // Cleanup file on error

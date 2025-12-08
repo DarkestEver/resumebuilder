@@ -17,8 +17,8 @@ export default function CVParsingPage() {
           <div className="mb-12">
             <h1 className="text-4xl font-bold mb-4">Upload Your Resume</h1>
             <p className="text-lg text-gray-600">
-              Quickly populate your profile by uploading your existing resume or CV. Our intelligent parsing system 
-              will extract your information and fill in your profile automatically.
+              Upload your PDF resume to create or update your profile or resume. Our intelligent parsing system 
+              will extract your information automatically.
             </p>
           </div>
 
@@ -34,9 +34,9 @@ export default function CVParsingPage() {
                 <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">
                   1
                 </div>
-                <h3 className="text-lg font-semibold mb-2">Upload Your CV</h3>
+                <h3 className="text-lg font-semibold mb-2">Upload Your PDF</h3>
                 <p className="text-gray-600 text-sm">
-                  Choose your CV from your computer or drag and drop it. We support PDF, Word, and image formats.
+                  Choose your PDF resume from your computer or drag and drop it. Only PDF format is supported.
                 </p>
               </div>
 
@@ -71,7 +71,7 @@ export default function CVParsingPage() {
               <div>
                 <h3 className="font-semibold text-lg mb-2">What file formats are supported?</h3>
                 <p className="text-gray-700">
-                  We support PDF, Microsoft Word (DOC/DOCX), text files (TXT), and images (JPG/PNG). The maximum file size is 10MB.
+                  We support PDF files only. The maximum file size is 10MB. This ensures the best extraction accuracy.
                 </p>
               </div>
 
@@ -84,9 +84,18 @@ export default function CVParsingPage() {
               </div>
 
               <div>
+                <h3 className="font-semibold text-lg mb-2">What's the difference between Profile and Resume?</h3>
+                <p className="text-gray-700">
+                  A <strong>Profile</strong> is your master data store - all your information in one place. 
+                  A <strong>Resume</strong> is a specific document generated from a profile. You can create multiple 
+                  resumes from one profile, each tailored for different jobs.
+                </p>
+              </div>
+
+              <div>
                 <h3 className="font-semibold text-lg mb-2">Can I edit the extracted information?</h3>
                 <p className="text-gray-700">
-                  Yes! After uploading, you can edit any extracted information in your profile. You maintain complete control over your data.
+                  Yes! After uploading, you can edit any extracted information in your profile or resume. You maintain complete control over your data.
                 </p>
               </div>
 
