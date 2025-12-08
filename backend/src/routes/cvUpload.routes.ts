@@ -63,7 +63,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
       return;
     }
 
-    const { uploadTarget, uploadMode, profileId, resumeId, newProfileName, newResumeTitle } = req.body;
+    const { uploadTarget, uploadMode, resumeId, newResumeTitle } = req.body;
 
     const result = await cvUploadController.uploadAndParseCv(
       req.user.userId,
@@ -72,9 +72,7 @@ router.post('/upload', authenticate, upload.single('file'), async (req: Request,
       {
         uploadTarget: uploadTarget as 'profile' | 'resume',
         uploadMode: uploadMode as 'update' | 'create',
-        profileId,
         resumeId,
-        newProfileName,
         newResumeTitle,
       }
     );
