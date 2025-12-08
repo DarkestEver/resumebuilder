@@ -353,11 +353,51 @@ router.post('/score-resume-pdf', authenticate, upload.single('pdf'), async (req:
       return;
     }
 
-    // Extract text from PDF
-    const pdf = require('pdf-parse');
+    // Extract text from PDF with multiple fallback strategies
+    let resumeText = '';
     const fileBuffer = fs.readFileSync(req.file.path);
-    const data = await pdf(fileBuffer);
-    const resumeText = data.text;
+    
+    try {
+      // Strategy 1: Try pdf-parse first (works for most PDFs)
+      const pdf = require('pdf-parse');
+      const data = await pdf(fileBuffer);
+      resumeText = data.text;
+      console.log('PDF parsed successfully with pdf-parse');
+    } catch (pdfParseError: any) {
+      console.warn('pdf-parse failed:', pdfParseError.message);
+      
+      // Strategy 2: Try pdf2json as fallback
+      try {
+        const PDFParser = require('pdf2json');
+        const pdfParser = new PDFParser();
+        
+        await new Promise((resolve, reject) => {
+          pdfParser.on('pdfParser_dataError', (errData: any) => reject(errData.parserError));
+          pdfParser.on('pdfParser_dataReady', (pdfData: any) => {
+            // Extract text from parsed data
+            const text = pdfData.Pages.map((page: any) =>
+              page.Texts.map((textItem: any) =>
+                textItem.R.map((r: any) => decodeURIComponent(r.T)).join(' ')
+              ).join(' ')
+            ).join('\n');
+            resumeText = text;
+            resolve(text);
+          });
+          pdfParser.parseBuffer(fileBuffer);
+        });
+        console.log('PDF parsed successfully with pdf2json');
+      } catch (pdf2jsonError: any) {
+        console.error('All PDF parsing strategies failed:', pdf2jsonError.message);
+        // Clean up temp file before throwing error
+        fs.unlinkSync(req.file.path);
+        res.status(400).json({
+          success: false,
+          message: 'Unable to parse PDF file. The file may be corrupted, password-protected, or use an unsupported format. Please try re-exporting your resume as a standard PDF.',
+          error: pdfParseError.message,
+        });
+        return;
+      }
+    }
 
     // Clean up temp file
     fs.unlinkSync(req.file.path);
