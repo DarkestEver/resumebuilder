@@ -215,21 +215,90 @@ export const cvUploadController = {
 
       // Handle Resume Target
       else if (uploadTarget === 'resume') {
+        // Get user's profile for filling missing data
+        const profile = await Profile.findOne({ userId });
+
+        if (!profile) {
+          throw new Error('Profile not found. Please create a profile first.');
+        }
+
+        // Fill missing fields from profile
+        const filledData = { ...extractedData };
+        
+        // Fill personalInfo if missing
+        if (!filledData.personalInfo || Object.keys(filledData.personalInfo).length === 0) {
+          filledData.personalInfo = profile.personalInfo ? { ...profile.personalInfo } : {};
+        } else {
+          filledData.personalInfo = {
+            firstName: filledData.personalInfo.firstName || profile.personalInfo?.firstName,
+            lastName: filledData.personalInfo.lastName || profile.personalInfo?.lastName,
+            title: filledData.personalInfo.title || profile.personalInfo?.title,
+            photo: filledData.personalInfo.photo || profile.personalInfo?.photo,
+          };
+        }
+
+        // Fill contact if missing
+        if (!filledData.contact || Object.keys(filledData.contact).length === 0) {
+          filledData.contact = profile.contact ? { ...profile.contact } : {};
+        } else {
+          filledData.contact = {
+            email: filledData.contact.email || profile.contact?.email,
+            phone: filledData.contact.phone || profile.contact?.phone,
+            website: filledData.contact.website || profile.contact?.website,
+            linkedin: filledData.contact.linkedin || profile.contact?.linkedin,
+            github: filledData.contact.github || profile.contact?.github,
+            address: filledData.contact.address || profile.contact?.address,
+          };
+        }
+
+        // Fill summary if missing
+        if (!filledData.summary && profile.summary) {
+          filledData.summary = profile.summary;
+        }
+
+        // Fill experience if missing or empty
+        if (!filledData.experience || filledData.experience.length === 0) {
+          filledData.experience = profile.experience || [];
+        }
+
+        // Fill education if missing or empty
+        if (!filledData.education || filledData.education.length === 0) {
+          filledData.education = profile.education || [];
+        }
+
+        // Fill skills if missing or empty
+        if (!filledData.skills || filledData.skills.length === 0) {
+          filledData.skills = profile.skills || [];
+        }
+
+        // Fill projects if missing or empty
+        if (!filledData.projects || filledData.projects.length === 0) {
+          filledData.projects = profile.projects || [];
+        }
+
+        // Fill certifications if missing or empty
+        if (!filledData.certifications || filledData.certifications.length === 0) {
+          filledData.certifications = profile.certifications || [];
+        }
+
+        // Fill languages if missing or empty
+        if (!filledData.languages || filledData.languages.length === 0) {
+          filledData.languages = profile.languages || [];
+        }
+
+        // Fill achievements if missing or empty
+        if (!filledData.achievements || filledData.achievements.length === 0) {
+          filledData.achievements = profile.achievements || [];
+        }
+
         if (uploadMode === 'create') {
-          // Get user's profile for linking
-          const profile = await Profile.findOne({ userId });
-
-          if (!profile) {
-            throw new Error('Profile not found. Please create a profile first.');
-          }
-
-          // Create new resume with extracted data
+          // Create new resume with filled data
           const resume = new Resume({
             userId,
             profileId: profile._id,
             title: newResumeTitle || 'Resume',
             templateId: 'modern-professional',
-            data: extractedData,
+            data: filledData,
             customizations: {},
             visibility: 'private',
           });
@@ -242,7 +311,7 @@ export const cvUploadController = {
             resume,
           };
         } else if (uploadMode === 'update' && resumeId) {
-          // Update existing resume
+          // Update existing resume with filled data
           const resume = await Resume.findOne({
             _id: resumeId,
             userId,
@@ -252,10 +321,10 @@ export const cvUploadController = {
             throw new Error('Resume not found');
           }
 
-          // Update resume data
+          // Update resume data with filled data
           resume.data = {
             ...resume.data,
-            ...extractedData,
+            ...filledData,
           };
           resume.lastSyncedAt = new Date();
 
