@@ -70,6 +70,34 @@ export const errorHandler = (
     });
   }
 
+  // Multer file upload errors
+  if (err.message === 'Unexpected end of form') {
+    return res.status(400).json({
+      success: false,
+      message: 'File upload was interrupted',
+      error: 'Please ensure the file is attached and the upload completes',
+      code: 'UPLOAD_INTERRUPTED',
+    });
+  }
+
+  if ((err as any).code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      success: false,
+      message: 'File too large',
+      error: 'Maximum file size is 10MB',
+      code: 'FILE_TOO_LARGE',
+    });
+  }
+
+  if ((err as any).code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({
+      success: false,
+      message: 'Unexpected field',
+      error: 'Use "file" as the field name for file uploads',
+      code: 'INVALID_FIELD',
+    });
+  }
+
   // Generic error
   logger.error('Unhandled error:', err);
 

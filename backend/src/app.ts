@@ -50,6 +50,7 @@ app.use(cors({
 app.use(morgan('combined', { stream: { write: (msg) => logger.info(msg.trim()) } }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+// Note: File uploads handled by multer in individual routes (see cvUpload.routes.ts)
 
 // Serve static files (uploaded photos and videos) with CORS headers
 app.use('/uploads', (_req, res, next) => {

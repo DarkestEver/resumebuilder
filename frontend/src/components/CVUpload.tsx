@@ -217,7 +217,7 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
                 // Redirect to the resume that was created/updated
                 const resumeId = response.data.resume?._id || selectedResumeId;
                 if (resumeId) {
-                  window.location.href = `/resumes/${resumeId}`;
+                  window.location.href = `/resume/${resumeId}`;
                 } else {
                   window.location.href = '/resumes';
                 }

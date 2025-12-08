@@ -16,7 +16,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.490.0",
     "@aws-sdk/s3-request-presigner": "^3.490.0",
+    "@google/generative-ai": "^0.24.1",
     "@types/bcrypt": "^6.0.0",
+    "@types/express-fileupload": "^1.5.1",
     "axios": "^1.6.5",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^2.4.3",
@@ -25,6 +27,7 @@
     "docx-parser": "^0.2.1",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",
+    "express-fileupload": "^1.5.2",
     "express-rate-limit": "^7.1.5",
     "express-validator": "^7.0.1",
     "helmet": "^7.1.0",

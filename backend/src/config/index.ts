@@ -84,7 +84,7 @@ export const config = {
   ai: {
     openai: {
       apiKey: process.env.OPENAI_API_KEY || '',
-      model: process.env.OPENAI_MODEL || 'gpt-4',
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
     },
     anthropic: {
       apiKey: process.env.ANTHROPIC_API_KEY || '',
@@ -92,9 +92,12 @@ export const config = {
     },
     gemini: {
       apiKey: process.env.GEMINI_API_KEY || '',
-      model: process.env.GEMINI_MODEL || 'gemini-1.5-pro',
+      model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
     },
-    primaryProvider: process.env.AI_PRIMARY_PROVIDER || 'openai',
+    // PRIMARY AI PROVIDER: Change this value to switch between providers
+    // Options: 'gemini', 'openai', 'anthropic'
+    // Default: 'gemini' (Google Gemini - cost-effective and fast)
+    primaryProvider: process.env.AI_PRIMARY_PROVIDER || 'gemini',
   },
 
   rateLimit: {

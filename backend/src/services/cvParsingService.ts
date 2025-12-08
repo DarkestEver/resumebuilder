@@ -226,7 +226,13 @@ export const cvParsingService = {
   },
 
   /**
-   * Extract data using AI (OpenAI/Claude/Gemini)
+   * Extract data using AI (Multi-Provider: Gemini/OpenAI/Anthropic)
+   * Uses the provider configured in AI_PRIMARY_PROVIDER environment variable
+   * 
+   * To switch providers, change AI_PRIMARY_PROVIDER in .env to:
+   * - 'gemini' (Google Gemini - fast, cost-effective)
+   * - 'openai' (OpenAI GPT - best for structured JSON)
+   * - 'anthropic' (Anthropic Claude - long context)
    */
   extractWithAI: async (text: string): Promise<ExtractedData> => {
     const prompt = `Extract the following information from this resume/CV text and return it as JSON. Be precise and extract only information that is explicitly present.
@@ -320,41 +326,113 @@ Return a JSON object with this exact structure (omit fields if not found):
 
 Return ONLY the JSON object, no additional text.`;
 
+    const provider = config.ai.primaryProvider;
     let aiResponse: string | null = null;
 
-    // Try OpenAI (most reliable for structured output)
-    try {
-      const response = await axios.post(
-        'https://api.openai.com/v1/chat/completions',
-        {
-          model: 'gpt-4o-mini', // Fast and cost-effective
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert CV/Resume parser. Extract information accurately and return valid JSON only.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          temperature: 0.1, // Low temperature for consistency
-          max_tokens: 3000,
-          response_format: { type: 'json_object' } // Force JSON response
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${config.ai.openai.apiKey}`,
-            'Content-Type': 'application/json',
+    // ============================================================================
+    // GOOGLE GEMINI (Active Provider if AI_PRIMARY_PROVIDER=gemini)
+    // ============================================================================
+    if (provider === 'gemini') {
+      try {
+        const { GoogleGenerativeAI } = require('@google/generative-ai');
+        const genAI = new GoogleGenerativeAI(config.ai.gemini.apiKey);
+        const model = genAI.getGenerativeModel({
+          model: config.ai.gemini.model,
+          generationConfig: {
+            temperature: 0.1,
+            maxOutputTokens: 3000,
+            responseMimeType: 'application/json',
           },
-        }
-      );
+        });
 
-      aiResponse = response.data.choices[0].message.content;
-      logger.info(`CV parsed with AI (${response.data.usage.total_tokens} tokens)`);
-    } catch (openaiError: any) {
-      logger.error('AI CV extraction failed:', openaiError.message);
-      throw new Error(`AI extraction failed: ${openaiError.message}`);
+        const systemInstruction = 'You are an expert CV/Resume parser. Extract information accurately and return valid JSON only.';
+        const fullPrompt = `${systemInstruction}\n\n${prompt}`;
+        
+        const result = await model.generateContent(fullPrompt);
+        const response = result.response;
+        aiResponse = response.text();
+        
+        logger.info(`CV parsed with Gemini AI (${response.usageMetadata?.totalTokenCount || 'N/A'} tokens)`);
+      } catch (geminiError: any) {
+        logger.error('Gemini CV extraction failed:', geminiError.message);
+        throw new Error(`Gemini extraction failed: ${geminiError.message}`);
+      }
+    }
+
+    // ============================================================================
+    // OPENAI (Active if AI_PRIMARY_PROVIDER=openai)
+    // ============================================================================
+    else if (provider === 'openai') {
+      try {
+        const response = await axios.post(
+          'https://api.openai.com/v1/chat/completions',
+          {
+            model: config.ai.openai.model,
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert CV/Resume parser. Extract information accurately and return valid JSON only.'
+              },
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.1,
+            max_tokens: 3000,
+            response_format: { type: 'json_object' }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${config.ai.openai.apiKey}`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        aiResponse = response.data.choices[0].message.content;
+        logger.info(`CV parsed with OpenAI (${response.data.usage.total_tokens} tokens)`);
+      } catch (openaiError: any) {
+        logger.error('OpenAI CV extraction failed:', openaiError.message);
+        throw new Error(`OpenAI extraction failed: ${openaiError.message}`);
+      }
+    }
+
+    // ============================================================================
+    // ANTHROPIC CLAUDE (Active if AI_PRIMARY_PROVIDER=anthropic)
+    // ============================================================================
+    else if (provider === 'anthropic') {
+      try {
+        const response = await axios.post(
+          'https://api.anthropic.com/v1/messages',
+          {
+            model: config.ai.anthropic.model,
+            max_tokens: 3000,
+            temperature: 0.1,
+            system: 'You are an expert CV/Resume parser. Extract information accurately and return valid JSON only.',
+            messages: [
+              { role: 'user', content: prompt },
+            ],
+          },
+          {
+            headers: {
+              'x-api-key': config.ai.anthropic.apiKey,
+              'anthropic-version': '2023-06-01',
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        aiResponse = response.data.content[0].text;
+        logger.info(`CV parsed with Anthropic (${response.data.usage.input_tokens + response.data.usage.output_tokens} tokens)`);
+      } catch (anthropicError: any) {
+        logger.error('Anthropic CV extraction failed:', anthropicError.message);
+        throw new Error(`Anthropic extraction failed: ${anthropicError.message}`);
+      }
+    }
+
+    else {
+      throw new Error(`Unsupported AI provider: ${provider}. Set AI_PRIMARY_PROVIDER to 'gemini', 'openai', or 'anthropic' in .env`);
     }
 
     if (!aiResponse) {

@@ -45,50 +45,74 @@ const router = Router();
  * POST /api/cv/upload
  * Upload and parse CV/Resume
  */
-router.post('/upload', authenticate, upload.single('file'), async (req: Request, res: Response) => {
-  try {
-    if (!req.file) {
-      res.status(400).json({
-        success: false,
-        message: 'No file uploaded',
-      });
-      return;
-    }
-
-    if (!req.user?.userId) {
-      res.status(401).json({
-        success: false,
-        message: 'Unauthorized',
-      });
-      return;
-    }
-
-    const { uploadTarget, uploadMode, resumeId, newResumeTitle } = req.body;
-
-    const result = await cvUploadController.uploadAndParseCv(
-      req.user.userId,
-      req.file.path,
-      req.file.mimetype,
-      {
-        uploadTarget: uploadTarget as 'profile' | 'resume',
-        uploadMode: uploadMode as 'update' | 'create',
-        resumeId,
-        newResumeTitle,
+router.post(
+  '/upload',
+  authenticate,
+  (req: Request, res: Response, next: any) => {
+    upload.single('file')(req, res, (err: any) => {
+      if (err) {
+        console.error('Multer error:', err);
+        if (err.message === 'Unexpected end of form') {
+          return res.status(400).json({
+            success: false,
+            message: 'File upload was interrupted. Please try again.',
+            error: 'Upload incomplete - ensure the file is attached and the request completes',
+          });
+        }
+        return res.status(400).json({
+          success: false,
+          message: err.message || 'File upload failed',
+          error: err.code || 'UPLOAD_ERROR',
+        });
       }
-    );
+      next();
+    });
+  },
+  async (req: Request, res: Response) => {
+    try {
+      if (!req.file) {
+        res.status(400).json({
+          success: false,
+          message: 'No file uploaded',
+        });
+        return;
+      }
 
-    res.json({
-      success: true,
-      message: 'CV uploaded and parsed successfully',
-      data: result,
-    });
-  } catch (error) {
-    console.error('CV upload error:', error);
-    res.status(500).json({
-      success: false,
-      message: error instanceof Error ? error.message : 'Failed to upload CV',
-    });
+      if (!req.user?.userId) {
+        res.status(401).json({
+          success: false,
+          message: 'Unauthorized',
+        });
+        return;
+      }
+
+      const { uploadTarget, uploadMode, resumeId, newResumeTitle } = req.body;
+
+      const result = await cvUploadController.uploadAndParseCv(
+        req.user.userId,
+        req.file.path,
+        req.file.mimetype,
+        {
+          uploadTarget: uploadTarget as 'profile' | 'resume',
+          uploadMode: uploadMode as 'update' | 'create',
+          resumeId,
+          newResumeTitle,
+        }
+      );
+
+      res.json({
+        success: true,
+        message: 'CV uploaded and parsed successfully',
+        data: result,
+      });
+    } catch (error) {
+      console.error('CV upload error:', error);
+      res.status(500).json({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to upload CV',
+      });
+    }
   }
-});
+);
 
 export default router;

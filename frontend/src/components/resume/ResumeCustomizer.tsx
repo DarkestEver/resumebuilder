@@ -87,12 +87,19 @@ export default function ResumeCustomizer({ resume, onNext }: ResumeCustomizerPro
         <div className="border border-purple-200 bg-purple-50 rounded-lg p-4">
           <h4 className="font-medium text-purple-900 mb-2">✨ AI Enhancements</h4>
           <div className="space-y-2">
-            <p className="text-xs text-purple-700 mb-3">Improve your resume content with AI</p>
+            <p className="text-xs text-purple-700 mb-3">Improve your resume summary with AI (uses full resume context)</p>
             {(resume?.data?.summary || profile?.summary) && (
               <ImproveContentButton
                 text={resume?.data?.summary || profile?.summary}
-                onImproved={(improved) => {
+                resumeContext={resume?.data || profile}
+                onImproved={async (improved) => {
                   console.log('Improved summary:', improved);
+                  // Update resume with improved summary
+                  const updatedData = {
+                    ...resume.data,
+                    summary: improved,
+                  };
+                  await updateResume(resume._id || resume.id, { data: updatedData });
                 }}
               />
             )}
