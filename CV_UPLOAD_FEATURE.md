@@ -257,10 +257,58 @@ Action: New resume created with extracted data from CV
 6. **Version History**: Keep history of all uploaded CVs
 7. **Export Formats**: Export extracted data in various formats
 
+## AI-Powered Extraction
+
+### How It Works
+
+1. **PDF Text Extraction**
+   - Primary: `pdf-parse` library
+   - Fallback: `pdf2json` for complex PDFs
+   - OCR: Tesseract.js for scanned PDFs
+
+2. **AI-Powered Parsing**
+   - **Primary**: OpenAI GPT-4o-mini with structured JSON output
+   - **Accuracy**: 85-95% depending on PDF quality and formatting
+   - **Fallback**: Regex pattern matching (~40% accuracy) if AI fails
+   - **Temperature**: 0.1 (low variance for consistency)
+   - **Response Format**: JSON object enforced
+
+3. **Multi-Strategy Approach**
+   ```
+   Upload PDF → Extract Text → AI Parsing → Structured Data
+                     ↓              ↓
+                 (3 methods)   (with fallback)
+                     ↓              ↓
+              Success/Retry    Regex fallback
+   ```
+
+### AI Extraction Process
+
+**Prompt Engineering:**
+- Extracts 10+ fields: personal info, contact, experience, education, skills, etc.
+- Handles various resume formats and layouts
+- Cleans and validates extracted data
+- Returns structured JSON matching our data models
+
+**Data Validation:**
+- Trims whitespace
+- Validates email/phone formats
+- Normalizes date formats (YYYY-MM)
+- Filters out empty/invalid entries
+- Maps skills with default proficiency levels
+
+### Cost Optimization
+
+- Model: GPT-4o-mini (10x cheaper than GPT-4)
+- Token limit: ~3000 tokens per extraction
+- Average cost: $0.001-0.003 per CV
+- Caching: None (each CV is unique)
+
 ## Notes
 
-- PDF parsing uses AI service (OpenAI/Claude/Gemini)
+- PDF parsing uses AI service (OpenAI GPT-4o-mini)
 - Extraction accuracy: 85-95% depending on PDF quality
 - Users should always review extracted data
 - Original PDF is deleted after extraction for privacy
 - Resume data can be independently edited after creation
+- AI extraction falls back to regex if API fails

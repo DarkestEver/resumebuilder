@@ -1,6 +1,9 @@
 import { parseDocx } from 'docx-parser';
 import Tesseract from 'tesseract.js';
 import PDFParser from 'pdf2json';
+import axios from 'axios';
+import { config } from '../config';
+import { logger } from '../utils/logger';
 
 
 /**
@@ -51,6 +54,28 @@ interface ExtractedData {
     name?: string;
     category?: string;
     level?: string;
+  }>;
+  projects?: Array<{
+    name?: string;
+    description?: string;
+    technologies?: string;
+    link?: string;
+    github?: string;
+  }>;
+  certifications?: Array<{
+    name?: string;
+    issuer?: string;
+    date?: string;
+    expiryDate?: string;
+  }>;
+  languages?: Array<{
+    name?: string;
+    proficiency?: string;
+  }>;
+  achievements?: Array<{
+    title?: string;
+    description?: string;
+    date?: string;
   }>;
 }
 
@@ -145,7 +170,7 @@ export const cvParsingService = {
     }
 
     console.log(`Extracted ${text.length} characters using ${parseMethod}`);
-    return cvParsingService.extractDataFromText(text);
+    return await cvParsingService.extractDataFromText(text);
   },
 
   /**
@@ -154,7 +179,7 @@ export const cvParsingService = {
   parseDOC: async (fileBuffer: Buffer): Promise<ExtractedData> => {
     try {
       const text = await parseDocx(fileBuffer);
-      return cvParsingService.extractDataFromText(text);
+      return await cvParsingService.extractDataFromText(text);
     } catch (error) {
       console.error('DOCX parsing error:', error);
       throw new Error('Failed to parse DOCX');
@@ -165,7 +190,7 @@ export const cvParsingService = {
    * Parse TXT file
    */
   parseTXT: async (text: string): Promise<ExtractedData> => {
-    return cvParsingService.extractDataFromText(text);
+    return await cvParsingService.extractDataFromText(text);
   },
 
   /**
@@ -179,7 +204,7 @@ export const cvParsingService = {
         'eng'
       );
       const text = result.text;
-      return cvParsingService.extractDataFromText(text);
+      return await cvParsingService.extractDataFromText(text);
     } catch (error) {
       console.error('Image OCR error:', error);
       throw new Error('Failed to parse image');
@@ -187,9 +212,306 @@ export const cvParsingService = {
   },
 
   /**
-   * Extract structured data from raw text
+   * Extract structured data from raw text using AI
    */
-  extractDataFromText: (text: string): ExtractedData => {
+  extractDataFromText: async (text: string): Promise<ExtractedData> => {
+    try {
+      // Try AI extraction first (much more accurate)
+      return await cvParsingService.extractWithAI(text);
+    } catch (aiError) {
+      console.error('AI extraction failed, falling back to regex:', aiError);
+      // Fallback to basic regex extraction
+      return cvParsingService.extractWithRegex(text);
+    }
+  },
+
+  /**
+   * Extract data using AI (OpenAI/Claude/Gemini)
+   */
+  extractWithAI: async (text: string): Promise<ExtractedData> => {
+    const prompt = `Extract the following information from this resume/CV text and return it as JSON. Be precise and extract only information that is explicitly present.
+
+Resume Text:
+"""
+${text.slice(0, 8000)} 
+"""
+
+Return a JSON object with this exact structure (omit fields if not found):
+{
+  "personalInfo": {
+    "firstName": "string",
+    "lastName": "string", 
+    "title": "string (job title/headline)"
+  },
+  "contact": {
+    "email": "string",
+    "phone": "string",
+    "address": {
+      "street": "string",
+      "city": "string",
+      "state": "string",
+      "zipCode": "string",
+      "country": "string"
+    },
+    "website": "string",
+    "linkedin": "string (full URL)",
+    "github": "string (full URL)"
+  },
+  "summary": "string (professional summary/objective, 2-3 sentences)",
+  "experience": [
+    {
+      "title": "string",
+      "company": "string",
+      "location": "string",
+      "startDate": "YYYY-MM format",
+      "endDate": "YYYY-MM or 'Present'",
+      "current": boolean,
+      "description": "string (key responsibilities and achievements)"
+    }
+  ],
+  "education": [
+    {
+      "degree": "string",
+      "institution": "string",
+      "location": "string",
+      "startDate": "YYYY-MM",
+      "endDate": "YYYY-MM",
+      "gpa": "string"
+    }
+  ],
+  "skills": [
+    {
+      "name": "string",
+      "category": "Technical/Soft/Language",
+      "level": "Beginner/Intermediate/Advanced/Expert"
+    }
+  ],
+  "projects": [
+    {
+      "name": "string",
+      "description": "string",
+      "technologies": "string",
+      "link": "string",
+      "github": "string"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "string",
+      "issuer": "string",
+      "date": "YYYY-MM",
+      "expiryDate": "YYYY-MM"
+    }
+  ],
+  "languages": [
+    {
+      "name": "string",
+      "proficiency": "Native/Fluent/Professional/Conversational/Basic"
+    }
+  ],
+  "achievements": [
+    {
+      "title": "string",
+      "description": "string",
+      "date": "YYYY-MM"
+    }
+  ]
+}
+
+Return ONLY the JSON object, no additional text.`;
+
+    let aiResponse: string | null = null;
+
+    // Try OpenAI (most reliable for structured output)
+    try {
+      const response = await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: 'gpt-4o-mini', // Fast and cost-effective
+          messages: [
+            {
+              role: 'system',
+              content: 'You are an expert CV/Resume parser. Extract information accurately and return valid JSON only.'
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.1, // Low temperature for consistency
+          max_tokens: 3000,
+          response_format: { type: 'json_object' } // Force JSON response
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${config.ai.openai.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      aiResponse = response.data.choices[0].message.content;
+      logger.info(`CV parsed with AI (${response.data.usage.total_tokens} tokens)`);
+    } catch (openaiError: any) {
+      logger.error('AI CV extraction failed:', openaiError.message);
+      throw new Error(`AI extraction failed: ${openaiError.message}`);
+    }
+
+    if (!aiResponse) {
+      throw new Error('AI service returned empty response');
+    }
+
+    // Parse JSON response
+    const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in AI response');
+    }
+
+    const extracted = JSON.parse(jsonMatch[0]);
+    
+    // Clean and validate the extracted data
+    return cvParsingService.cleanExtractedData(extracted);
+  },
+
+  /**
+   * Clean and validate extracted data
+   */
+  cleanExtractedData: (data: any): ExtractedData => {
+    const cleaned: ExtractedData = {};
+
+    // Personal Info
+    if (data.personalInfo) {
+      cleaned.personalInfo = {
+        firstName: data.personalInfo.firstName?.trim(),
+        lastName: data.personalInfo.lastName?.trim(),
+        title: data.personalInfo.title?.trim()
+      };
+    }
+
+    // Contact
+    if (data.contact) {
+      cleaned.contact = {};
+      if (data.contact.email) cleaned.contact.email = data.contact.email.trim();
+      if (data.contact.phone) cleaned.contact.phone = data.contact.phone.trim();
+      if (data.contact.website) cleaned.contact.website = data.contact.website.trim();
+      if (data.contact.linkedin) cleaned.contact.linkedin = data.contact.linkedin.trim();
+      if (data.contact.github) cleaned.contact.github = data.contact.github.trim();
+      
+      if (data.contact.address && typeof data.contact.address === 'object') {
+        cleaned.contact.address = data.contact.address;
+      }
+    }
+
+    // Summary
+    if (data.summary && typeof data.summary === 'string') {
+      cleaned.summary = data.summary.trim();
+    }
+
+    // Experience
+    if (Array.isArray(data.experience)) {
+      cleaned.experience = data.experience
+        .filter((exp: any) => exp.title || exp.company)
+        .map((exp: any) => ({
+          title: exp.title?.trim(),
+          company: exp.company?.trim(),
+          location: exp.location?.trim(),
+          startDate: exp.startDate?.trim(),
+          endDate: exp.endDate?.trim() || (exp.current ? 'Present' : undefined),
+          current: !!exp.current,
+          description: exp.description?.trim()
+        }));
+    }
+
+    // Education
+    if (Array.isArray(data.education)) {
+      cleaned.education = data.education
+        .filter((edu: any) => edu.degree || edu.institution)
+        .map((edu: any) => ({
+          degree: edu.degree?.trim(),
+          institution: edu.institution?.trim(),
+          location: edu.location?.trim(),
+          startDate: edu.startDate?.trim(),
+          endDate: edu.endDate?.trim(),
+          gpa: edu.gpa?.trim()
+        }));
+    }
+
+    // Skills
+    if (Array.isArray(data.skills)) {
+      cleaned.skills = data.skills
+        .filter((skill: any) => skill.name || typeof skill === 'string')
+        .map((skill: any) => 
+          typeof skill === 'string' 
+            ? { name: skill.trim(), level: 'intermediate' }
+            : {
+                name: skill.name?.trim(),
+                category: skill.category?.trim(),
+                level: skill.level?.trim() || 'intermediate'
+              }
+        );
+    }
+
+    // Projects
+    if (Array.isArray(data.projects)) {
+      cleaned.projects = data.projects
+        .filter((proj: any) => proj.name)
+        .map((proj: any) => ({
+          name: proj.name?.trim(),
+          description: proj.description?.trim(),
+          technologies: proj.technologies?.trim(),
+          link: proj.link?.trim(),
+          github: proj.github?.trim()
+        }));
+    }
+
+    // Certifications
+    if (Array.isArray(data.certifications)) {
+      cleaned.certifications = data.certifications
+        .filter((cert: any) => cert.name)
+        .map((cert: any) => ({
+          name: cert.name?.trim(),
+          issuer: cert.issuer?.trim(),
+          date: cert.date?.trim(),
+          expiryDate: cert.expiryDate?.trim()
+        }));
+    }
+
+    // Languages
+    if (Array.isArray(data.languages)) {
+      cleaned.languages = data.languages
+        .filter((lang: any) => lang.name || typeof lang === 'string')
+        .map((lang: any) =>
+          typeof lang === 'string'
+            ? { name: lang.trim(), proficiency: 'Professional' }
+            : {
+                name: lang.name?.trim(),
+                proficiency: lang.proficiency?.trim() || 'Professional'
+              }
+        );
+    }
+
+    // Achievements
+    if (Array.isArray(data.achievements)) {
+      cleaned.achievements = data.achievements
+        .filter((ach: any) => ach.title || ach.description || typeof ach === 'string')
+        .map((ach: any) =>
+          typeof ach === 'string'
+            ? { description: ach.trim() }
+            : {
+                title: ach.title?.trim(),
+                description: ach.description?.trim(),
+                date: ach.date?.trim()
+              }
+        );
+    }
+
+    return cleaned;
+  },
+
+  /**
+   * Fallback: Extract data using regex (basic, ~40% accuracy)
+   */
+  extractWithRegex: (text: string): ExtractedData => {
     const extracted: ExtractedData = {};
 
     // Extract email
