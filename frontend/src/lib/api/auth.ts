@@ -93,18 +93,32 @@ apiClient.interceptors.response.use(
         // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${tokens.accessToken}`;
         return apiClient(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed - clear tokens and redirect to login
-        console.error('Token refresh failed, logging out');
-        authStore.setState({ 
-          user: null, 
-          accessToken: null, 
-          refreshToken: null, 
-          isAuthenticated: false 
-        });
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login?expired=true';
+      } catch (refreshError: any) {
+        // Refresh failed - check if it's because refresh token is invalid/expired
+        const refreshErrorCode = refreshError?.response?.data?.code;
+        const isRefreshTokenInvalid = 
+          refreshErrorCode === 'INVALID_REFRESH_TOKEN' ||
+          refreshErrorCode === 'TOKEN_EXPIRED' ||
+          refreshErrorCode === 'TOKEN_INVALID' ||
+          refreshError?.response?.status === 401;
+        
+        if (isRefreshTokenInvalid) {
+          // Refresh token itself is expired/invalid - clear everything and redirect
+          console.error('Refresh token invalid or expired, logging out');
+          authStore.setState({ 
+            user: null, 
+            accessToken: null, 
+            refreshToken: null, 
+            isAuthenticated: false 
+          });
+          if (typeof window !== 'undefined') {
+            window.location.href = '/login?expired=true';
+          }
+        } else {
+          // Some other error during refresh
+          console.error('Token refresh failed:', refreshError);
         }
+        
         return Promise.reject(refreshError);
       }
     }

@@ -207,6 +207,13 @@ const ResumeSchema: Schema = new Schema(
 ResumeSchema.index({ userId: 1, createdAt: -1 });
 ResumeSchema.index({ shortId: 1 });
 ResumeSchema.index({ visibility: 1 });
-ResumeSchema.index({ userId: 1, slug: 1 }, { unique: true, sparse: true });
+// Partial index: only enforce uniqueness when slug is not null
+ResumeSchema.index(
+  { userId: 1, slug: 1 }, 
+  { 
+    unique: true, 
+    partialFilterExpression: { slug: { $type: 'string' } } 
+  }
+);
 
 export const Resume = mongoose.model<IResume>('Resume', ResumeSchema);

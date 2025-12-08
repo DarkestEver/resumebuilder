@@ -17,10 +17,25 @@ export class ResumeController {
         throw new AppError('Not authenticated', 401);
       }
 
-      const resumes = await Resume.find({ 
-        userId: req.user.userId,
-        deletedAt: null,
-      }).sort({ updatedAt: -1 });
+      // Check if lightweight response requested (only _id and title)
+      const lightweight = req.query.fields === 'minimal';
+
+      let resumes;
+      if (lightweight) {
+        // Only return _id, title, and templateId for dropdown
+        resumes = await Resume.find({ 
+          userId: req.user.userId,
+          deletedAt: null,
+        })
+        .select('_id title templateId')
+        .sort({ updatedAt: -1 });
+      } else {
+        // Return full resume documents
+        resumes = await Resume.find({ 
+          userId: req.user.userId,
+          deletedAt: null,
+        }).sort({ updatedAt: -1 });
+      }
 
       res.json({
         success: true,

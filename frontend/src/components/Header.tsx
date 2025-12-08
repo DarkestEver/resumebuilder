@@ -64,68 +64,18 @@ export default function Header() {
                 <Link href="/resume" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
                   Resumes
                 </Link>
-                
-                {/* Tools Dropdown */}
-                <div className="relative">
-                  <button
-                    onClick={() => setShowToolsMenu(!showToolsMenu)}
-                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition"
-                  >
-                    Tools
-                    <ChevronDown className="w-4 h-4" />
-                  </button>
-                  
-                  {showToolsMenu && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={() => setShowToolsMenu(false)} />
-                      <div className="absolute left-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-20">
-                        <Link href="/templates" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <LayoutTemplate className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">Templates</div>
-                            <div className="text-xs text-gray-500">20+ professional designs</div>
-                          </div>
-                        </Link>
-                        <Link href="/cv-upload" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <Upload className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">CV Upload</div>
-                            <div className="text-xs text-gray-500">Extract data from existing CV</div>
-                          </div>
-                        </Link>
-                        <Link href="/optimize" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <Target className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">ATS Optimizer</div>
-                            <div className="text-xs text-gray-500">Score & improve your resume</div>
-                          </div>
-                        </Link>
-                        <Link href="/video-profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <Video className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">Video Profile</div>
-                            <div className="text-xs text-gray-500">Add video introduction</div>
-                          </div>
-                        </Link>
-                        <Link href="/cover-letter" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <FileText className="w-4 h-4" />
-                          <div>
-                            <div className="font-medium">Cover Letter</div>
-                            <div className="text-xs text-gray-500">AI-powered cover letters</div>
-                          </div>
-                        </Link>
-                        <div className="border-t border-gray-200 my-2" />
-                        <Link href="/pricing" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition" onClick={() => setShowToolsMenu(false)}>
-                          <Sparkles className="w-4 h-4 text-yellow-500" />
-                          <div>
-                            <div className="font-medium">Upgrade to Pro</div>
-                            <div className="text-xs text-gray-500">Unlock all features</div>
-                          </div>
-                        </Link>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <Link href="/cv-upload" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
+                  Upload CV
+                </Link>
+                <Link href="/video-profile" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
+                  Video Profile
+                </Link>
+                <Link href="/optimize" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
+                  ATS Score
+                </Link>
+                <Link href="/cover-letter" className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
+                  Cover Letter
+                </Link>
               </div>
             )}
           </div>
@@ -218,36 +168,24 @@ export default function Header() {
               <Link href="/resume" className="block px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
                 Resumes
               </Link>
+              <Link href="/cv-upload" className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
+                <Upload className="w-4 h-4" />
+                Upload CV
+              </Link>
+              <Link href="/video-profile" className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
+                <Video className="w-4 h-4" />
+                Video Profile
+              </Link>
+              <Link href="/optimize" className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
+                <Target className="w-4 h-4" />
+                ATS Score
+              </Link>
+              <Link href="/cover-letter" className="flex items-center gap-2 px-3 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
+                <FileText className="w-4 h-4" />
+                Cover Letter
+              </Link>
               
-              <div className="pt-2 pb-2">
-                <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">Tools</div>
-                <Link href="/templates" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <LayoutTemplate className="w-4 h-4" />
-                  Templates
-                </Link>
-                <Link href="/cv-upload" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <Upload className="w-4 h-4" />
-                  CV Upload
-                </Link>
-                <Link href="/optimize" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <Target className="w-4 h-4" />
-                  ATS Optimizer
-                </Link>
-                <Link href="/video-profile" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <Video className="w-4 h-4" />
-                  Video Profile
-                </Link>
-                <Link href="/cover-letter" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <FileText className="w-4 h-4" />
-                  Cover Letter
-                </Link>
-                <Link href="/advanced" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
-                  <Sparkles className="w-4 h-4" />
-                  Job Matcher
-                </Link>
-              </div>
-              
-              <div className="border-t border-gray-200 pt-2">
+              <div className="border-t border-gray-200 pt-2 mt-2">
                 <Link href="/settings" className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded-lg" onClick={closeMobileMenu}>
                   <Settings className="w-4 h-4" />
                   Settings

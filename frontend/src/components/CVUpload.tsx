@@ -40,6 +40,7 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>('');
   const [newResumeTitle, setNewResumeTitle] = useState('');
+  const [hasProfile, setHasProfile] = useState(false);
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { updateProfile } = profileStore();
@@ -49,25 +50,68 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
   const maxFileSize = 10 * 1024 * 1024; // 10MB
 
   useEffect(() => {
+    checkProfile();
     fetchResumes();
   }, []);
 
+  const checkProfile = async () => {
+    try {
+      console.log('🔍 Checking profile... accessToken:', accessToken ? 'exists' : 'missing');
+      
+      // Use completion endpoint - lightweight, only returns percentage
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profiles/completion`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      
+      console.log('🔍 Profile API response status:', response.status);
+      
+      const data = await response.json();
+      console.log('🔍 Profile API response data:', data);
+      
+      // If completion endpoint returns data, profile exists
+      const profileExists = data.success && data.data !== null && data.data !== undefined;
+      console.log('🔍 Profile exists?', profileExists, 'Setting hasProfile to:', profileExists);
+      
+      setHasProfile(profileExists);
+    } catch (error) {
+      console.error('❌ Failed to check profile:', error);
+      setHasProfile(false);
+    }
+  };
+
+  // Reset mode to 'update' when switching to resume target
+  useEffect(() => {
+    if (uploadTarget === 'resume' && resumes.length > 0) {
+      setUploadMode('update');
+      if (resumes[0]?._id) {
+        setSelectedResumeId(resumes[0]._id);
+      }
+    }
+  }, [uploadTarget]);
+
   const fetchResumes = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/resumes`, {
+      // Use minimal fields query parameter - only fetch _id, title, templateId
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/resumes?fields=minimal`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
       const data = await response.json();
-      if (data.success) {
-        setResumes(data.data);
-        if (data.data.length > 0) {
-          setSelectedResumeId(data.data[0]._id);
+      // API returns data.data.resumes (nested structure)
+      if (data.success && data.data && Array.isArray(data.data.resumes)) {
+        setResumes(data.data.resumes);
+        if (data.data.resumes.length > 0) {
+          setSelectedResumeId(data.data.resumes[0]._id);
         }
+      } else {
+        setResumes([]); // Ensure it's always an array
       }
     } catch (error) {
       console.error('Failed to fetch resumes:', error);
+      setResumes([]); // Ensure it's always an array
     }
   };
 
@@ -122,6 +166,14 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
     formData.append('file', file);
     formData.append('uploadTarget', uploadTarget);
     
+    // Debug logging
+    console.log('🔍 Upload Debug:', {
+      uploadTarget,
+      uploadMode,
+      selectedResumeId,
+      newResumeTitle,
+    });
+    
     // Profile target always updates the user's single profile
     // Resume target can create or update
     if (uploadTarget === 'resume') {
@@ -156,22 +208,31 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
             const action = uploadTarget === 'profile' ? 'updated' : (uploadMode === 'create' ? 'created' : 'updated');
             toast.success(`${targetName} ${action} successfully from CV!`);
             
-            // Refresh data lists
-            if (uploadTarget === 'resume') {
-              fetchResumes();
-            }
-            
-            // Reset form
+            // Redirect after short delay
             setTimeout(() => {
-              setSuccess(false);
-              setProgress(0);
-              setNewResumeTitle('');
-              if (fileInputRef.current) {
-                fileInputRef.current.value = '';
+              if (uploadTarget === 'profile') {
+                // Redirect to profile page
+                window.location.href = '/profile';
+              } else {
+                // Redirect to the resume that was created/updated
+                const resumeId = response.data.resume?._id || selectedResumeId;
+                if (resumeId) {
+                  window.location.href = `/resumes/${resumeId}`;
+                } else {
+                  window.location.href = '/resumes';
+                }
               }
-              onSuccess?.();
-            }, 2000);
+            }, 1500);
           }
+        } else if (xhr.status === 401) {
+          // Authentication error - redirect to login
+          const errorMsg = 'Session expired. Please login again.';
+          setError(errorMsg);
+          toast.error(errorMsg);
+          setUploading(false);
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 2000);
         } else {
           const response = JSON.parse(xhr.responseText);
           const errorMsg = response.message || 'Failed to upload CV';
@@ -248,16 +309,26 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
             </button>
             <button
               onClick={() => setUploadTarget('resume')}
+              disabled={!hasProfile}
               className={`flex-1 px-4 py-3 rounded-lg font-medium transition-all ${
                 uploadTarget === 'resume'
                   ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:border-blue-400'
+                  : hasProfile
+                  ? 'bg-white text-gray-700 border border-gray-300 hover:border-blue-400'
+                  : 'bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed'
               }`}
+              title={!hasProfile ? 'Create a profile first' : ''}
             >
               <FileText className="inline-block w-5 h-5 mr-2 mb-1" />
-              Resume
+              Resume {!hasProfile && '🔒'}
             </button>
           </div>
+          
+          {!hasProfile && (
+            <p className="mt-3 text-sm text-orange-700 bg-orange-50 p-2 rounded">
+              ⚠️ Create your profile first by uploading a CV to "Profile" above. Then you can create resumes.
+            </p>
+          )}
         </div>
 
         {/* Upload Mode Selection - Only for Resume */}
@@ -297,7 +368,7 @@ const CVUpload: React.FC<CVUploadProps> = ({ onSuccess }) => {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Select resume to update</option>
-                {resumes.map((resume) => (
+                {Array.isArray(resumes) && resumes.map((resume) => (
                   <option key={resume._id} value={resume._id}>
                     {resume.title}
                   </option>
