@@ -22,6 +22,7 @@ import activityRoutes from './routes/activity.routes';
 import videoRoutes from './routes/video.routes';
 import adminRoutes from './routes/admin.routes';
 import advancedRoutes from './routes/advanced.routes';
+import linkedinRoutes from './routes/linkedin.routes';
 
 const app: Application = express();
 
@@ -104,6 +105,7 @@ app.use('/api/activities', activityRoutes);
 app.use('/api/videos', videoRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/advanced', advancedRoutes);
+app.use('/api/linkedin', linkedinRoutes);
 
 // 404 Handler
 app.use((req: Request, res: Response) => {

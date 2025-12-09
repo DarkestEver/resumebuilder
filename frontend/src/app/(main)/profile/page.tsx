@@ -11,24 +11,63 @@ import { useSearchParams } from 'next/navigation';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { profileStore } from '@/stores/profileStore';
 import { authStore } from '@/stores/authStore';
+import { linkedinApi } from '@/lib/api/linkedin';
+import { toast } from 'sonner';
 import { 
   User, Mail, Phone, MapPin, Briefcase, GraduationCap, 
   Award, Globe, CheckCircle2, XCircle, Plus, Trash2, 
   Building2, Calendar, Edit2, Languages as LanguagesIcon,
-  FolderOpen, BookOpen, Trophy, FileText, Lightbulb, Camera
+  FolderOpen, BookOpen, Trophy, FileText, Lightbulb, Camera, Linkedin
 } from 'lucide-react';
 
 function ProfilePageContent() {
   const searchParams = useSearchParams();
   const profileId = searchParams.get('profileId');
+  const linkedinCode = searchParams.get('code');
+  const linkedinCallback = searchParams.get('linkedin');
   const { profile, isLoading, isSaving, error, completionPercentage, fetchProfile, createProfile, updateProfile } = profileStore();
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [syncingLinkedIn, setSyncingLinkedIn] = useState(false);
   
   useEffect(() => {
     // If profileId is provided, fetch that specific profile
     // Otherwise, fetch default profile
     fetchProfile();
   }, [fetchProfile, profileId]);
+
+  // Handle LinkedIn callback
+  useEffect(() => {
+    if (linkedinCallback === 'callback' && linkedinCode) {
+      handleLinkedInSync(linkedinCode);
+    }
+  }, [linkedinCallback, linkedinCode]);
+
+  const handleLinkedInImport = async () => {
+    try {
+      const response = await linkedinApi.getAuthUrl();
+      const authUrl = response.data.authUrl;
+      window.location.href = authUrl;
+    } catch (error) {
+      console.error('Failed to get LinkedIn auth URL:', error);
+      toast.error('Failed to connect to LinkedIn');
+    }
+  };
+
+  const handleLinkedInSync = async (code: string) => {
+    setSyncingLinkedIn(true);
+    try {
+      await linkedinApi.syncProfile(code);
+      await fetchProfile();
+      toast.success('LinkedIn profile synced successfully!');
+      // Remove query params from URL
+      window.history.replaceState({}, '', '/profile');
+    } catch (error: any) {
+      console.error('LinkedIn sync failed:', error);
+      toast.error(error.response?.data?.message || 'Failed to sync LinkedIn profile');
+    } finally {
+      setSyncingLinkedIn(false);
+    }
+  };
 
   const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -185,9 +224,29 @@ function ProfilePageContent() {
                     </div>
                   </div>
                   
-                  <div className="text-center bg-gray-50 px-6 py-3 rounded-lg border border-gray-200">
-                    <div className="text-3xl font-bold text-blue-600">{completionPercentage}%</div>
-                    <div className="text-xs text-gray-600 mt-1">Complete</div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleLinkedInImport}
+                      disabled={syncingLinkedIn}
+                      className="inline-flex items-center gap-2 bg-[#0077B5] text-white px-4 py-2 rounded-lg hover:bg-[#006399] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {syncingLinkedIn ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                          <span>Syncing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Linkedin className="w-4 h-4" />
+                          <span>Import from LinkedIn</span>
+                        </>
+                      )}
+                    </button>
+                    
+                    <div className="text-center bg-gray-50 px-6 py-3 rounded-lg border border-gray-200">
+                      <div className="text-3xl font-bold text-blue-600">{completionPercentage}%</div>
+                      <div className="text-xs text-gray-600 mt-1">Complete</div>
+                    </div>
                   </div>
                 </div>
               </div>
