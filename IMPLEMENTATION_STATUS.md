@@ -1659,3 +1659,27 @@ Successfully implemented all high-priority frontend features without stopping:
 ---
 
 **Auto-update instructions**: This file should be updated after every major feature implementation or at least once per week during active development.
+
+---
+
+## ✉️ Cover Letter Generator – Design Improvements
+
+**Date**: December 9, 2025
+
+**Changes Implemented**:
+- Updated cover letter rendering for better readability and professionalism
+- Header now adapts to template `headerStyle` variants: `traditional`, `modern`, `minimal`
+- Added subject line rendering (e.g., "Re: Application for …") derived from `subject` or `positionTitle/companyName`
+- Closing phrase now adapts to template `tone` (`formal`, `conversational`, `enthusiastic`, `confident`)
+- Paragraph spacing respects template `style.paragraphSpacing` for consistent typography
+
+**Files Modified**:
+- `frontend/src/components/cover-letter/CoverLetterRenderer.tsx`
+
+**Notes**:
+- Layout variants (`layout: 'two-column' | 'sidebar'`) are still rendered as standard single-column for ATS-friendliness; can be enhanced later if needed.
+- Export remains text-only; PDF styling not required for this pass.
+
+**Next Opportunities**:
+- Optional: Add print-specific styles to remove shadow and margins when printing
+- Optional: Implement visual adjustments for `two-column`/`sidebar` while keeping ATS-safe exports
