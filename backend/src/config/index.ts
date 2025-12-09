@@ -20,10 +20,10 @@ export const config = {
     secret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'your-refresh-secret-change-in-production',
     accessSecret: process.env.JWT_SECRET || 'your-secret-key-change-in-production',
-    accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
-    refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
-    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '15m',
-    refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '7d',
+    accessTokenExpiry: process.env.JWT_ACCESS_EXPIRY || '24h',
+    refreshTokenExpiry: process.env.JWT_REFRESH_EXPIRY || '30d',
+    accessExpiry: process.env.JWT_ACCESS_EXPIRY || '24h',
+    refreshExpiry: process.env.JWT_REFRESH_EXPIRY || '30d',
   },
 
   cors: {

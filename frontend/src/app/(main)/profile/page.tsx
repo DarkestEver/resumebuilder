@@ -268,7 +268,7 @@ function ProfilePageContent() {
 // Contact Section Component
 function ContactSection({ profile, updateProfile }: any) {
   const [isEditing, setIsEditing] = useState(false);
-  const [contact, setContact] = useState(profile?.contact || {
+  const [contact, setContact] = useState({
     email: '',
     phone: '',
     alternatePhone: '',
@@ -283,7 +283,8 @@ function ContactSection({ profile, updateProfile }: any) {
     website: '',
     linkedin: '',
     github: '',
-    portfolio: ''
+    portfolio: '',
+    ...profile?.contact
   });
 
   const handleSave = async () => {
@@ -516,14 +517,15 @@ function ContactSection({ profile, updateProfile }: any) {
 // Personal Information Section Component
 function PersonalInfoSection({ profile, updateProfile }: any) {
   const [isEditing, setIsEditing] = useState(false);
-  const [personalInfo, setPersonalInfo] = useState(profile?.personalInfo || {
+  const [personalInfo, setPersonalInfo] = useState({
     firstName: '',
     lastName: '',
     title: '',
     dateOfBirth: '',
     nationality: '',
     placeOfBirth: '',
-    photo: ''
+    photo: '',
+    ...profile?.personalInfo
   });
 
   const handleSave = async () => {
@@ -1218,11 +1220,12 @@ function CoursesSection({ profile, updateProfile }: any) {
 // Signature Section Component
 function SignatureSection({ profile, updateProfile }: any) {
   const [isEditing, setIsEditing] = useState(false);
-  const [signature, setSignature] = useState(profile?.signature || {
+  const [signature, setSignature] = useState({
     name: '',
     date: '',
     place: '',
-    image: ''
+    image: '',
+    ...profile?.signature
   });
 
   const handleSave = async () => {
