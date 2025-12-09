@@ -24,6 +24,7 @@
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "docx-parser": "^0.2.1",
+    "lucide-react": "^0.556.0",
     "pdf-parse": "^2.4.5",
     "pdfkit": "^0.17.2",
     "tesseract.js": "^6.0.1"

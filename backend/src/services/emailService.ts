@@ -189,4 +189,68 @@ export const emailService = {
       html,
     });
   },
+
+  /**
+   * Send admin alert for critical errors
+   */
+  sendAdminAlert: async (
+    subject: string,
+    errorDetails: {
+      error: string;
+      service: string;
+      timestamp: string;
+      additionalInfo?: any;
+    }
+  ): Promise<boolean> => {
+    try {
+      const html = `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: #dc2626; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+            <h1 style="margin: 0; font-size: 24px;">🚨 Critical Error Alert</h1>
+          </div>
+          <div style="background: #f9fafb; padding: 20px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+            <div style="background: white; padding: 20px; border-radius: 6px; margin-bottom: 20px;">
+              <h2 style="color: #dc2626; margin-top: 0;">Error Details</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold; width: 120px;">Service:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${errorDetails.service}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Timestamp:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${errorDetails.timestamp}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Error:</td>
+                  <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; color: #dc2626; font-family: monospace; font-size: 12px; word-break: break-all;">${errorDetails.error}</td>
+                </tr>
+              </table>
+            </div>
+            ${errorDetails.additionalInfo ? `
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+              <h3 style="margin-top: 0; color: #92400e;">Additional Information</h3>
+              <pre style="background: white; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">${JSON.stringify(errorDetails.additionalInfo, null, 2)}</pre>
+            </div>
+            ` : ''}
+            <div style="background: #dbeafe; border-left: 4px solid #2563eb; padding: 15px; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #1e40af;">Action Required</h3>
+              <p style="margin: 0; font-size: 14px; color: #1e3a8a;">Please investigate and resolve this issue immediately to maintain service availability.</p>
+            </div>
+          </div>
+          <div style="text-align: center; padding: 20px; font-size: 12px; color: #666;">
+            <p>ProfileBuilder Monitoring System</p>
+          </div>
+        </div>
+      `;
+
+      return emailService.send({
+        to: config.email.adminEmail,
+        subject: `[CRITICAL] ${subject}`,
+        html,
+      });
+    } catch (error) {
+      console.error('Failed to send admin alert:', error);
+      return false;
+    }
+  },
 };

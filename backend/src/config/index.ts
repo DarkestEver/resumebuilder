@@ -44,6 +44,7 @@ export const config = {
 
   email: {
     from: process.env.EMAIL_FROM || 'noreply@profilebuilder.com',
+    adminEmail: process.env.ADMIN_EMAIL || 'admin@profilebuilder.com',
     fromName: process.env.EMAIL_FROM_NAME || 'ProfileBuilder',
     fromEmail: process.env.EMAIL_FROM || 'noreply@profilebuilder.com',
     smtpHost: process.env.SMTP_HOST || '',

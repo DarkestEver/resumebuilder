@@ -352,14 +352,14 @@ export default function ResumeEditorByIdPage() {
           )}
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Customizer */}
-            <div className="no-print">
+            <div className="no-print lg:col-span-1">
               <ResumeCustomizer resume={selectedResume} onNext={() => {}} />
             </div>
 
             {/* Preview */}
-            <div className="sticky top-4">
+            <div className="lg:col-span-2 sticky top-4">
               <ResumePreview resume={selectedResume} />
             </div>
           </div>

@@ -1662,6 +1662,72 @@ Successfully implemented all high-priority frontend features without stopping:
 
 ---
 
+## 🔔 Admin Error Notification System
+
+**Date**: December 9, 2025
+
+**Features Implemented**:
+- Admin email alerts for critical system errors
+- Email notifications for AI API failures (key leaks, quota exceeded, auth errors)
+- Configurable admin email in environment variables
+- Error severity levels (CRITICAL, HIGH, MEDIUM, LOW)
+- Error pattern monitoring (alerts if error occurs > threshold times)
+- Pre-configured notifiers for common services (Database, Payment, Email, Storage, Auth, Cache)
+
+**Configuration**:
+- Added `ADMIN_EMAIL` to `.env` file
+- Added `adminEmail` to config system
+- Admin receives formatted HTML email alerts with error details
+
+**Files Created/Modified**:
+- `backend/.env` - Added `ADMIN_EMAIL` configuration
+- `backend/src/config/index.ts` - Added `adminEmail` to config
+- `backend/src/services/emailService.ts` - Added `sendAdminAlert()` method
+- `backend/src/services/aiService.ts` - Added automatic alert on critical AI errors
+- `backend/src/utils/errorNotifier.ts` - New utility for error notifications
+
+**Alert Triggers**:
+- AI API key leaked or expired (403/401 errors)
+- API quota exceeded or billing issues
+- Database connection failures
+- Payment processing errors
+- Mass authentication failures
+- Email service failures
+- File storage errors
+
+**Email Format**:
+- Red header with "🚨 Critical Error Alert"
+- Error details table (Service, Timestamp, Error)
+- Additional info section with JSON details
+- Action required notice
+- Subject line: `[CRITICAL] {error description}`
+
+**Usage Example**:
+```typescript
+import { errorNotifiers } from '../utils/errorNotifier';
+
+// Notify admin of database error
+await errorNotifiers.databaseError(error, { connectionString: '...' });
+
+// Custom notification
+await notifyAdmin({
+  severity: ErrorSeverity.CRITICAL,
+  service: 'Custom Service',
+  error: 'Something went wrong',
+  additionalInfo: { userId, action }
+});
+```
+
+**Next Steps**:
+- Configure SMTP settings in `.env` with real credentials
+- Set actual admin email address
+- Monitor error logs and refine alert thresholds
+- Consider adding Slack/Discord webhook integration
+
+---
+
+---
+
 ## ✉️ Cover Letter Generator – Design Improvements
 
 **Date**: December 9, 2025

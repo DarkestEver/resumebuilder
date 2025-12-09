@@ -13,9 +13,29 @@ import { logger } from '../utils/logger';
 const router = Router();
 
 const PLAN_PRICES = {
-  free: { name: 'Free', credits: 100, price: 0 },
-  pro: { name: 'Pro', credits: 10000, price: 999, stripeId: 'price_pro' }, // $9.99/month
-  enterprise: { name: 'Enterprise', credits: 50000, price: 4999, stripeId: 'price_enterprise' }, // $49.99/month
+  free: { 
+    name: 'Free', 
+    credits: 50, 
+    price: 0,
+    templates: 3,
+    resumes: 2,
+  },
+  pro: { 
+    name: 'Pro', 
+    credits: 1000, 
+    price: 1499, // $14.99/month
+    stripeId: 'price_pro',
+    templates: 'unlimited',
+    resumes: 'unlimited',
+  },
+  enterprise: { 
+    name: 'Enterprise', 
+    credits: 5000, 
+    price: 4999, // $49.99/month
+    stripeId: 'price_enterprise',
+    templates: 'unlimited',
+    resumes: 'unlimited',
+  },
 };
 
 /**
@@ -254,12 +274,20 @@ router.get('/plans', async (_req: Request, res: Response) => {
         currency: 'usd',
         period: 'forever',
         credits: PLAN_PRICES.free.credits,
+        popular: false,
         features: [
-          '3 basic templates',
-          '100 AI credits/month',
-          'Public profile access',
-          'Basic resume management',
+          '3 professional templates',
+          '50 AI credits/month',
+          '2 resume versions',
+          'Basic ATS optimization',
+          'PDF export',
+          'Public profile (with watermark)',
           'Community support',
+        ],
+        limitations: [
+          'Limited template access',
+          'Watermarked downloads',
+          'Basic features only',
         ],
       },
       {
@@ -269,17 +297,23 @@ router.get('/plans', async (_req: Request, res: Response) => {
         currency: 'usd',
         period: 'month',
         credits: PLAN_PRICES.pro.credits,
+        popular: true,
         features: [
-          'All templates',
-          '10,000 AI credits/month',
-          'Premium themes',
+          '20+ premium templates',
+          '1,000 AI credits/month',
           'Unlimited resumes',
-          'CV upload & parsing',
+          'CV upload & auto-parsing',
+          'AI content enhancement',
           'Tailored resume generation',
-          'Cover letter generation',
-          'ATS optimization',
-          'Email support',
+          'Cover letter generator',
+          'Advanced ATS optimization',
+          'ATS score analysis',
+          'Video profile',
+          'Custom public profile URL',
+          'No watermarks',
+          'Priority email support',
         ],
+        limitations: [],
       },
       {
         id: 'enterprise',
@@ -288,16 +322,22 @@ router.get('/plans', async (_req: Request, res: Response) => {
         currency: 'usd',
         period: 'month',
         credits: PLAN_PRICES.enterprise.credits,
+        popular: false,
         features: [
           'Everything in Pro',
-          '50,000 AI credits/month',
-          'Team collaboration',
-          'Custom branding',
-          'Priority support',
+          '5,000 AI credits/month',
+          'Team collaboration (up to 10 members)',
+          'Custom branding & templates',
+          'Bulk resume operations',
+          'Advanced analytics dashboard',
           'API access',
-          'Advanced analytics',
-          'Bulk operations',
+          'White-label option',
+          'Dedicated account manager',
+          'Custom integrations',
+          'Priority phone & chat support',
+          'SLA guarantee',
         ],
+        limitations: [],
       },
     ];
 

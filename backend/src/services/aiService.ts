@@ -2,6 +2,7 @@ import axios from 'axios';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { config } from '../config';
 import { logger } from '../utils/logger';
+import { emailService } from './emailService';
 
 /**
  * =============================================================================
@@ -165,6 +166,38 @@ async function callAI(systemPrompt: string, userPrompt: string, options: {
     throw new Error(`Unsupported AI provider: ${provider}`);
   } catch (error: any) {
     logger.error(`AI Provider (${provider}) Error:`, error.message);
+    
+    // Send admin alert for critical errors
+    const errorMessage = error.message || 'Unknown error';
+    const isCriticalError = 
+      errorMessage.includes('API key') || 
+      errorMessage.includes('leaked') || 
+      errorMessage.includes('403') ||
+      errorMessage.includes('401') ||
+      errorMessage.includes('quota') ||
+      errorMessage.includes('billing');
+
+    if (isCriticalError) {
+      // Send alert asynchronously (don't block the error flow)
+      emailService.sendAdminAlert(
+        `AI Service Error - ${provider.toUpperCase()}`,
+        {
+          error: errorMessage,
+          service: `AI Provider: ${provider}`,
+          timestamp: new Date().toISOString(),
+          additionalInfo: {
+            provider,
+            model: provider === 'gemini' ? config.ai.gemini.model : 
+                   provider === 'openai' ? config.ai.openai.model : 
+                   config.ai.anthropic.model,
+            errorType: error.response?.status || 'Unknown',
+          }
+        }
+      ).catch(emailError => {
+        logger.error('Failed to send admin alert email:', emailError);
+      });
+    }
+
     throw new Error(`Failed to get response from AI provider: ${error.message}`);
   }
 }

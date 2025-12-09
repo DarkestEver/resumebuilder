@@ -1,162 +1,171 @@
 import React from 'react';
 import { TemplateProps } from './types';
+import { Mail, Phone, MapPin, Linkedin } from 'lucide-react';
 
 const ModernTemplate: React.FC<TemplateProps> = ({ profile, customizations }) => {
   const primaryColor = customizations?.colors?.primary || '#2563eb';
-  const textColor = '#000000';
+  const textColor = customizations?.colors?.text || '#333333';
+  const font = customizations?.font || 'sans-serif';
+
+  const sectionTitleStyle = {
+    color: primaryColor,
+    borderBottom: `2px solid ${primaryColor}`,
+  };
 
   return (
-    <div className="w-full bg-white p-8 font-sans" style={{ color: textColor }}>
-      {/* Header - ATS Optimized */}
-      <div className="pb-4 mb-6 border-b-2 border-gray-800">
-        <h1 className="text-3xl font-bold mb-1" style={{ color: textColor }}>
-          {profile.personalInfo?.firstName} {profile.personalInfo?.lastName}
-        </h1>
-        {profile.personalInfo?.title && (
-          <p className="text-base mb-2">{profile.personalInfo.title}</p>
-        )}
-        <div className="text-sm space-y-1">
-          {profile.contact?.email && <div>Email: {profile.contact.email}</div>}
-          {profile.contact?.phone && <div>Phone: {profile.contact.phone}</div>}
-          {profile.contact?.address && (
-            <div>
-              Location: {typeof profile.contact.address === 'string'
-                ? profile.contact.address
-                : `${profile.contact.address?.city}, ${profile.contact.address?.country}`}
+    <div className="w-full bg-white p-8" style={{ color: textColor, fontFamily: font }}>
+      {/* Header */}
+      <div className="flex justify-between items-center pb-4 mb-6 border-b-2" style={{ borderColor: primaryColor }}>
+        <div>
+          <h1 className="text-4xl font-bold" style={{ color: primaryColor }}>
+            {profile.personalInfo?.firstName} {profile.personalInfo?.lastName}
+          </h1>
+          {profile.personalInfo?.title && (
+            <p className="text-lg text-gray-600">{profile.personalInfo.title}</p>
+          )}
+        </div>
+        <div className="text-sm text-right">
+          {profile.contact?.email && (
+            <div className="flex items-center justify-end mb-1">
+              <span className="mr-2">{profile.contact.email}</span>
+              <Mail size={14} />
             </div>
           )}
-          {profile.contact?.linkedin && <div>LinkedIn: {profile.contact.linkedin}</div>}
+          {profile.contact?.phone && (
+            <div className="flex items-center justify-end mb-1">
+              <span className="mr-2">{profile.contact.phone}</span>
+              <Phone size={14} />
+            </div>
+          )}
+          {profile.contact?.address && (
+            <div className="flex items-center justify-end mb-1">
+              <span className="mr-2">
+                {typeof profile.contact.address === 'string'
+                  ? profile.contact.address
+                  : `${profile.contact.address?.city}, ${profile.contact.address?.country}`}
+              </span>
+              <MapPin size={14} />
+            </div>
+          )}
+          {profile.contact?.linkedin && (
+            <div className="flex items-center justify-end">
+              <span className="mr-2">{profile.contact.linkedin}</span>
+              <Linkedin size={14} />
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Professional Summary - ATS Optimized */}
+      {/* Professional Summary */}
       {profile.summary && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             PROFESSIONAL SUMMARY
           </h2>
           <p className="text-sm leading-relaxed">{profile.summary}</p>
         </div>
       )}
 
-      {/* Skills - ATS Optimized (Single Column, Simple List) */}
+      {/* Skills */}
       {profile.skills && profile.skills.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             SKILLS
           </h2>
-          <p className="text-sm leading-relaxed">
-            {profile.skills.map((skill: any) => typeof skill === 'string' ? skill : skill.name || '').join(' • ')}
-          </p>
+          <div className="flex flex-wrap">
+            {profile.skills.map((skill: any, idx: number) => (
+              <span key={idx} className="text-sm bg-gray-200 rounded-full px-3 py-1 mr-2 mb-2">
+                {typeof skill === 'string' ? skill : skill.name || ''}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Experience - ATS Optimized */}
+      {/* Experience */}
       {profile.experience && profile.experience.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             PROFESSIONAL EXPERIENCE
           </h2>
           {profile.experience.map((exp: any, idx: number) => (
             <div key={idx} className="mb-4">
-              <div className="flex justify-between items-start mb-1">
-                <p className="font-bold text-base">{exp.title}</p>
-                <span className="text-sm text-gray-700 whitespace-nowrap ml-4">
-                  {exp.startDate && typeof exp.startDate === 'string'
-                    ? exp.startDate.slice(0, 7)
-                    : exp.startDate instanceof Date
-                    ? exp.startDate.toISOString().slice(0, 7)
-                    : ''}{' '}
-                  - {' '}
-                  {exp.endDate && typeof exp.endDate === 'string'
-                    ? exp.endDate.slice(0, 7)
-                    : exp.endDate instanceof Date
-                    ? exp.endDate.toISOString().slice(0, 7)
-                    : 'Present'}
+              <div className="flex justify-between items-baseline mb-1">
+                <h3 className="font-bold text-base">{exp.title}</h3>
+                <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
+                  {exp.startDate ? new Date(exp.startDate).getFullYear() : ''} - {exp.endDate ? new Date(exp.endDate).getFullYear() : 'Present'}
                 </span>
               </div>
-              <p className="font-semibold text-sm mb-1">{exp.company}</p>
-              <p className="text-sm mt-1 leading-relaxed">{exp.description}</p>
+              <p className="font-semibold text-sm mb-1" style={{ color: primaryColor }}>{exp.company}</p>
+              <ul className="list-disc list-inside text-sm mt-1 leading-relaxed">
+                {exp.description?.split('\n').map((item: string, i: number) => item && <li key={i}>{item}</li>)}
+              </ul>
             </div>
           ))}
         </div>
       )}
 
-      {/* Education - ATS Optimized */}
+      {/* Education */}
       {profile.education && profile.education.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             EDUCATION
           </h2>
           {profile.education.map((edu: any, idx: number) => (
             <div key={idx} className="mb-3">
-              <div className="flex justify-between items-start mb-1">
+              <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-bold text-sm">{edu.degree}</p>
-                  <p className="text-sm">{edu.institution}</p>
+                  <h3 className="font-bold text-base">{edu.degree}</h3>
+                  <p className="text-sm italic">{edu.institution}</p>
                 </div>
-                <span className="text-sm text-gray-700 whitespace-nowrap ml-4">
-                  {edu.startDate && typeof edu.startDate === 'string'
-                    ? edu.startDate.slice(0, 4)
-                    : edu.startDate instanceof Date
-                    ? edu.startDate.getFullYear()
-                    : ''}{' '}
-                  {edu.endDate && (
-                    <>
-                      - {' '}
-                      {typeof edu.endDate === 'string'
-                        ? edu.endDate.slice(0, 4)
-                        : edu.endDate instanceof Date
-                        ? edu.endDate.getFullYear()
-                        : ''}
-                    </>
-                  )}
+                <span className="text-sm text-gray-600 font-medium whitespace-nowrap ml-4">
+                  {edu.endDate ? new Date(edu.endDate).getFullYear() : ''}
                 </span>
               </div>
-              {edu.gpa && <p className="text-sm">GPA: {edu.gpa}</p>}
+              {edu.gpa && <p className="text-sm mt-1">GPA: {edu.gpa}</p>}
             </div>
           ))}
         </div>
       )}
 
-      {/* Projects - ATS Optimized */}
+      {/* Projects */}
       {profile.projects && profile.projects.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             PROJECTS
           </h2>
           {profile.projects.map((project: any, idx: number) => (
             <div key={idx} className="mb-3">
-              <p className="font-bold text-sm">{project.name}</p>
+              <h3 className="font-bold text-base">{project.name}</h3>
               <p className="text-sm leading-relaxed">{project.description}</p>
-              {project.link && <p className="text-sm">Link: {project.link}</p>}
+              {project.link && <a href={project.link} className="text-sm" style={{ color: primaryColor }}>View Project</a>}
             </div>
           ))}
         </div>
       )}
 
-      {/* Certifications - ATS Optimized */}
+      {/* Certifications */}
       {profile.certifications && profile.certifications.length > 0 && (
         <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             CERTIFICATIONS
           </h2>
           {profile.certifications.map((cert: any, idx: number) => (
             <div key={idx} className="mb-2">
               <p className="text-sm">
-                {typeof cert === 'string' ? cert : cert.name || ''}
+                <span className="font-semibold">{typeof cert === 'string' ? cert : cert.name || ''}</span>
                 {cert.issuer && ` - ${cert.issuer}`}
-                {cert.date && ` (${cert.date})`}
+                {cert.date && ` (${new Date(cert.date).getFullYear()})`}
               </p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Languages - ATS Optimized */}
+      {/* Languages */}
       {profile.languages && profile.languages.length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-lg font-bold mb-2 border-b border-gray-800" style={{ color: textColor }}>
+        <div>
+          <h2 className="text-xl font-bold mb-2 pb-1" style={sectionTitleStyle}>
             LANGUAGES
           </h2>
           <p className="text-sm">
