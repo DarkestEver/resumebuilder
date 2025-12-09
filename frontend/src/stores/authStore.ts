@@ -39,7 +39,7 @@ interface AuthActions {
   setError: (error: string | null) => void;
   setLoading: (loading: boolean) => void;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  register: (name: string, username: string, email: string, password: string, agreeToTerms?: boolean) => Promise<void>;
   loginWithOTP: (email: string, otp: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshAccessToken: () => Promise<void>;
@@ -128,10 +128,10 @@ export const authStore = create<AuthStore>()(
       },
 
       // Register new user
-      register: async (name, email, password) => {
+      register: async (name, username, email, password, agreeToTerms = true) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await authApi.register({ name, email, password });
+          const response = await authApi.register({ name, username, email, password, agreeToTerms });
           const { user, tokens } = response.data;
 
           set({

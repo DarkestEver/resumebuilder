@@ -18,6 +18,11 @@ import { Sparkles, Mail, Lock, User, Eye, EyeOff, CheckCircle2, ArrowRight, Shie
 const registerSchema = z
   .object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(20, 'Username must be at most 20 characters')
+      .regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, hyphens and underscores'),
     email: z.string().email('Please enter a valid email address'),
     password: z
       .string()
@@ -49,6 +54,7 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
     defaultValues: {
       name: '',
+      username: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -61,7 +67,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      await authStore.getState().register(data.name, data.email, data.password);
+      await authStore.getState().register(data.name, data.username, data.email, data.password, data.terms);
       router.push('/dashboard?welcome=true');
     } catch (error: any) {
       setGeneralError(
@@ -146,6 +152,35 @@ export default function RegisterPage() {
                   {form.formState.errors.name.message}
                 </p>
               )}
+            </div>
+
+            {/* Username */}
+            <div>
+              <label htmlFor="username" className="block text-sm font-semibold text-gray-700 mb-2">
+                Username
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  {...form.register('username')}
+                  id="username"
+                  type="text"
+                  autoComplete="username"
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="johndoe"
+                />
+              </div>
+              {form.formState.errors.username && (
+                <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
+                  <span className="inline-block w-1 h-1 bg-red-600 rounded-full"></span>
+                  {form.formState.errors.username.message}
+                </p>
+              )}
+              <p className="mt-2 text-xs text-gray-500">
+                Lowercase letters, numbers, hyphens and underscores only
+              </p>
             </div>
 
             {/* Email */}

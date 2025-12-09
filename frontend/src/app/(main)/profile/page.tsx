@@ -15,19 +15,59 @@ import {
   User, Mail, Phone, MapPin, Briefcase, GraduationCap, 
   Award, Globe, CheckCircle2, XCircle, Plus, Trash2, 
   Building2, Calendar, Edit2, Languages as LanguagesIcon,
-  FolderOpen, BookOpen, Trophy, FileText, Lightbulb
+  FolderOpen, BookOpen, Trophy, FileText, Lightbulb, Camera
 } from 'lucide-react';
 
 function ProfilePageContent() {
   const searchParams = useSearchParams();
   const profileId = searchParams.get('profileId');
   const { profile, isLoading, isSaving, error, completionPercentage, fetchProfile, createProfile, updateProfile } = profileStore();
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   
   useEffect(() => {
     // If profileId is provided, fetch that specific profile
     // Otherwise, fetch default profile
     fetchProfile();
   }, [fetchProfile, profileId]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingPhoto(true);
+
+    try {
+      // Convert to base64 for now (in production, upload to cloud storage)
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64String = reader.result as string;
+        await updateProfile({
+          personalInfo: {
+            ...profile.personalInfo,
+            photo: base64String
+          }
+        });
+        setUploadingPhoto(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Photo upload failed:', error);
+      alert('Failed to upload photo');
+      setUploadingPhoto(false);
+    }
+  };
 
   const handleCreateProfile = async () => {
     try {
@@ -93,7 +133,7 @@ function ProfilePageContent() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="relative">
               <div className="absolute -top-20 left-0">
-                <div className="w-40 h-40 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden">
+                <div className="w-40 h-40 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden relative group">
                   {profile.personalInfo?.photo ? (
                     <img src={profile.personalInfo.photo} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -101,6 +141,24 @@ function ProfilePageContent() {
                       <User className="w-16 h-16 text-gray-400" />
                     </div>
                   )}
+                  
+                  {/* Upload overlay */}
+                  <label className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 flex items-center justify-center cursor-pointer transition-all">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      disabled={uploadingPhoto}
+                    />
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      {uploadingPhoto ? (
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      ) : (
+                        <Camera className="w-8 h-8 text-white" />
+                      )}
+                    </div>
+                  </label>
                 </div>
               </div>
 

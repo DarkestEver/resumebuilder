@@ -12,6 +12,11 @@ export const schemas = {
       email: z.string().email('Invalid email address'),
       password: z.string().min(8, 'Password must be at least 8 characters'),
       name: z.string().min(2, 'Name must be at least 2 characters'),
+      username: z
+        .string()
+        .min(3, 'Username must be at least 3 characters')
+        .max(20, 'Username must be at most 20 characters')
+        .regex(/^[a-z0-9_-]+$/, 'Username can only contain lowercase letters, numbers, hyphens and underscores'),
       agreeToTerms: z.boolean().refine((val: boolean) => val === true, {
         message: 'You must agree to terms and conditions',
       }),

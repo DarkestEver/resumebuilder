@@ -13,12 +13,18 @@ export class AuthController {
    */
   static async register(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { email, password, name } = req.body;
+      const { email, password, name, username } = req.body;
 
-      // Check if user exists
+      // Check if email exists
       const existingUser = await User.findOne({ email: email.toLowerCase() });
       if (existingUser) {
         throw new AppError('Email already registered', 409);
+      }
+
+      // Check if username exists
+      const existingUsername = await User.findOne({ username: username.toLowerCase() });
+      if (existingUsername) {
+        throw new AppError('Username already taken', 409);
       }
 
       // Validate password strength
@@ -35,6 +41,7 @@ export class AuthController {
         email: email.toLowerCase(),
         password: hashedPassword,
         name,
+        username: username.toLowerCase(),
         role: 'user',
         emailVerified: false,
         subscription: {
