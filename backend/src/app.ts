@@ -107,12 +107,34 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/advanced', advancedRoutes);
 app.use('/api/linkedin', linkedinRoutes);
 
-// 404 Handler
-app.use((req: Request, res: Response) => {
+// 404 Handler - Only for API routes
+app.use('/api/*', (req: Request, res: Response) => {
   res.status(404).json({
     success: false,
-    message: 'Route not found',
+    message: 'API route not found',
     path: req.path,
+  });
+});
+
+// Serve Next.js static files from public folder (production)
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
+
+// Serve Next.js _next static assets
+app.use('/_next', express.static(path.join(publicPath, '_next')));
+
+// All other routes - serve index.html for client-side routing
+app.get('*', (req: Request, res: Response) => {
+  const indexPath = path.join(publicPath, 'index.html');
+  res.sendFile(indexPath, (err) => {
+    if (err) {
+      // If index.html doesn't exist, return 404
+      res.status(404).json({
+        success: false,
+        message: 'Frontend not found. Run: npm run build:frontend',
+        path: req.path,
+      });
+    }
   });
 });
 
