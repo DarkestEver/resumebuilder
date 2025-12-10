@@ -1,73 +1,49 @@
 /**
- * Production Server - Combined Backend API + Next.js Frontend
+ * Production Server - Backend API Only
  * 
- * This server runs both the Express API and Next.js in a single process
- * for simplified production deployment.
+ * For production deployment:
+ * - Backend API runs on this server (port 5000)
+ * - Frontend should be deployed separately (Vercel, Netlify, or another port)
+ * 
+ * For local development, run:
+ * - Backend: npm run dev:backend (port 5000)
+ * - Frontend: npm run dev:frontend (port 3000)
  */
 
-const { createServer } = require('http');
-const { parse } = require('url');
-const next = require('next');
 const path = require('path');
 
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOST || '0.0.0.0';
+// Set environment
+process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 const port = parseInt(process.env.PORT || '5000', 10);
-
-// Initialize Next.js
-const nextApp = next({ 
-  dev,
-  dir: path.join(__dirname, 'frontend'),
-  hostname,
-  port
-});
-const handle = nextApp.getRequestHandler();
 
 async function startServer() {
   try {
-    await nextApp.prepare();
-    console.log('✅ Next.js prepared');
-
-    // Import backend app (compiled) - wrap in try-catch
-    let backendApp;
+    // Import backend app (compiled)
+    let app;
     try {
-      backendApp = require('./backend/dist/app').default;
+      app = require('./backend/dist/app').default;
       console.log('✅ Backend loaded');
     } catch (err) {
       console.error('❌ Failed to load backend:', err.message);
-      console.log('⚠️  Running frontend only mode');
-      backendApp = null;
+      console.error('   Run "cd backend && npm run build" first');
+      process.exit(1);
     }
     
-    // Create combined server
-    const server = createServer(async (req, res) => {
-      const parsedUrl = parse(req.url, true);
-      const { pathname } = parsedUrl;
-
-      // API routes go to Express backend
-      if (backendApp && (
-          pathname.startsWith('/api/') || 
-          pathname.startsWith('/uploads/') ||
-          pathname === '/health')) {
-        backendApp(req, res);
-      } 
-      // Everything else goes to Next.js
-      else {
-        await handle(req, res, parsedUrl);
-      }
-    });
-
-    server.listen(port, hostname, () => {
+    // Start the server
+    app.listen(port, '0.0.0.0', () => {
       console.log(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   🚀 ProfileBuilder Production Server                     ║
+║   🚀 ProfileBuilder API Server                            ║
 ║                                                           ║
-║   Server running at: http://${hostname}:${port}              ║
-║   Environment: ${dev ? 'development' : 'production'}                            ║
+║   Server running at: http://0.0.0.0:${port}                  ║
+║   Environment: ${process.env.NODE_ENV.padEnd(11)}                        ║
 ║                                                           ║
-║   API:      http://${hostname}:${port}/api                   ║
-║   Frontend: http://${hostname}:${port}                       ║
+║   API:      http://0.0.0.0:${port}/api                       ║
+║   Health:   http://0.0.0.0:${port}/health                    ║
+║                                                           ║
+║   Frontend: Run separately with 'npm run dev:frontend'    ║
+║             or deploy to Vercel/Netlify                   ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
       `);
@@ -78,5 +54,7 @@ async function startServer() {
     process.exit(1);
   }
 }
+
+startServer();
 
 startServer();
