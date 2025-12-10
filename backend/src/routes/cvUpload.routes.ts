@@ -49,21 +49,23 @@ router.post(
   '/upload',
   authenticate,
   (req: Request, res: Response, next: any) => {
-    upload.single('file')(req, res, (err: any) => {
+    upload.single('file')(req, res, (err: any): void => {
       if (err) {
         console.error('Multer error:', err);
         if (err.message === 'Unexpected end of form') {
-          return res.status(400).json({
+          res.status(400).json({
             success: false,
             message: 'File upload was interrupted. Please try again.',
             error: 'Upload incomplete - ensure the file is attached and the request completes',
           });
+          return;
         }
-        return res.status(400).json({
+        res.status(400).json({
           success: false,
           message: err.message || 'File upload failed',
           error: err.code || 'UPLOAD_ERROR',
         });
+        return;
       }
       next();
     });

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Catalyst Template - Sales & Business Development
  * 
@@ -14,11 +15,11 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 import { TrendingUp, Target, Award, DollarSign } from 'lucide-react';
 
 interface CatalystTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

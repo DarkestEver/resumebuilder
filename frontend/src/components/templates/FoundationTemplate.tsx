@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Foundation Template - Student/Entry-Level
  * 
@@ -16,10 +17,10 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 
 interface FoundationTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

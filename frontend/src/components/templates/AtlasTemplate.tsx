@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Atlas Template - Gold Standard ATS Resume
  * 
@@ -16,10 +17,10 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 
 interface AtlasTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

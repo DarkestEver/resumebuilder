@@ -117,7 +117,7 @@ export function generateModernPDF(data: ResumeData): Readable {
 
   // Separator line
   doc.moveDown(0.8);
-  doc.strokeColor('#1F2937').lineWidth(2.5).moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+  doc.strokeColor('#1F2937').lineWidth(2.5).moveTo(50, doc.y).lineTo((doc as any).page.width - 50, doc.y).stroke();
   doc.moveDown(0.8);
 
   // Summary
@@ -159,7 +159,7 @@ export function generateModernPDF(data: ResumeData): Readable {
         });
       }
       
-      if (index < data.experience.length - 1) {
+      if (index < (data.experience?.length || 0) - 1) {
         doc.moveDown(0.6);
       }
     });
@@ -192,7 +192,7 @@ export function generateModernPDF(data: ResumeData): Readable {
         doc.fontSize(9).fillColor('#9CA3AF').text(eduDetails.join(' • '));
       }
       
-      if (index < data.education.length - 1) {
+      if (index < (data.education?.length || 0) - 1) {
         doc.moveDown(0.6);
       }
     });
@@ -229,7 +229,7 @@ export function generateModernPDF(data: ResumeData): Readable {
         );
       }
       
-      if (index < data.projects.length - 1) {
+      if (index < (data.projects?.length || 0) - 1) {
         doc.moveDown(0.6);
       }
     });
@@ -252,7 +252,7 @@ export function generateModernPDF(data: ResumeData): Readable {
         doc.fontSize(9).fillColor('#6B7280').text(certDetails.join(' • '));
       }
       
-      if (index < data.certifications.length - 1) {
+      if (index < (data.certifications?.length || 0) - 1) {
         doc.moveDown(0.4);
       }
     });

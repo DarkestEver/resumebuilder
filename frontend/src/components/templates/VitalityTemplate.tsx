@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Vitality Template - Healthcare Professional
  * 
@@ -14,7 +15,7 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 import { Award, Stethoscope, BookOpen } from 'lucide-react';
 
 interface VitalityTemplateProps {

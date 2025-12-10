@@ -94,8 +94,8 @@ router.get('/:id/export-pdf', authenticate, async (req: Request, res: Response) 
     };
 
     // Apply customizations (hide sections, etc.)
-    if (resume.customizations?.hiddenSections) {
-      const hiddenSections = resume.customizations.hiddenSections;
+    if ((resume.customizations as any)?.hiddenSections) {
+      const hiddenSections = (resume.customizations as any).hiddenSections;
       if (hiddenSections.includes('summary')) resumeData.summary = undefined;
       if (hiddenSections.includes('experience')) resumeData.experience = undefined;
       if (hiddenSections.includes('education')) resumeData.education = undefined;

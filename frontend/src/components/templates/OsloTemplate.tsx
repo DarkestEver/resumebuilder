@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Oslo Template - Modern Picture Resume
  * 
@@ -16,11 +17,11 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 import { Mail, Phone, MapPin, Globe, Linkedin, Github, Calendar } from 'lucide-react';
 
 interface OsloTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

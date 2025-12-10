@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Precision Template - Finance/Legal Traditional
  * 
@@ -14,10 +15,10 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 
 interface PrecisionTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

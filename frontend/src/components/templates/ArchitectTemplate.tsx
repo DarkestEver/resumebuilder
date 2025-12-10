@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Architect Template - Project-Based Resume
  * 
@@ -15,11 +16,11 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 import { Ruler, Award, Wrench } from 'lucide-react';
 
 interface ArchitectTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';

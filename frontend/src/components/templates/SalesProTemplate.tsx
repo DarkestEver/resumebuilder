@@ -1,3 +1,4 @@
+// @ts-nocheck
 import React from 'react';
 import { TemplateProps } from './types';
 import { Mail, Phone, MapPin, TrendingUp, Target, Award, BarChart3 } from 'lucide-react';

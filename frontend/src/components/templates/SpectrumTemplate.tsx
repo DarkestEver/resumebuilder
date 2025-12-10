@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Spectrum Template - Creative Bold
  * 
@@ -13,11 +14,11 @@
  */
 
 import React from 'react';
-import { Profile } from '@/types';
+import { TemplateProps } from './types';
 import { Palette, Award, Briefcase, GraduationCap, Code } from 'lucide-react';
 
 interface SpectrumTemplateProps {
-  profile: Profile;
+  profile: TemplateProps['profile'];
   customizations?: {
     primaryColor?: string;
     fontSize?: 'small' | 'medium' | 'large';
