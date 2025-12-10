@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import TemplateStore from '@/lib/templateStore';
 import useTemplateInitialization from '@/hooks/useTemplateInitialization';
 
-// Professional Resume Templates - Redesigned for 2025
+// Professional Resume Templates - Enhanced 2025 Edition
 const STATIC_TEMPLATES: Array<{
   id: string;
   name: string;
@@ -20,43 +20,54 @@ const STATIC_TEMPLATES: Array<{
   preview: string;
   category: string;
   tags: string[];
-  colors?: any;
-  fonts?: any;
+  atsScore?: number;
+  badge?: string;
 }> = [
-  // Executive & Leadership
-  { id: 'executive', name: 'Executive Elite', description: 'Premium C-suite & VP resume with metrics focus', preview: '👔', category: 'Executive', tags: ['leadership', 'senior', 'enterprise'] },
-  { id: 'senior-executive', name: 'Board Ready', description: 'Board members, strategic leadership, P&L excellence', preview: '💼', category: 'Executive', tags: ['c-level', 'board', 'strategy'] },
+  // NEW ENHANCED TEMPLATES (Phase 1 - 2025)
+  { id: 'atlas', name: 'Atlas', description: '⭐ Gold Standard ATS - 100% compatibility', preview: '✨', category: 'ATS Gold', tags: ['ats', 'gold', 'perfect'], atsScore: 100, badge: '⭐ Gold Standard' },
+  { id: 'oslo', name: 'Oslo', description: 'Modern Picture Resume with sidebar', preview: '📸', category: 'Picture', tags: ['photo', 'modern', 'sidebar'], atsScore: 75, badge: '📸 Photo Friendly' },
+  { id: 'velocity', name: 'Velocity', description: 'Startup/Tech Dynamic with gradient', preview: '🚀', category: 'Technical', tags: ['startup', 'tech', 'gradient'], atsScore: 70, badge: '🚀 Projects First' },
+  { id: 'executive-pro', name: 'Executive Pro', description: 'Senior Leadership with gold accents', preview: '💼', category: 'Executive', tags: ['c-level', 'gold', 'premium'], atsScore: 85, badge: '💎 Gold Accents' },
+  { id: 'precision', name: 'Precision', description: 'Finance/Legal Traditional format', preview: '⚖️', category: 'Professional', tags: ['finance', 'legal', 'formal'], atsScore: 95, badge: '📜 Certifications' },
+  { id: 'spectrum', name: 'Spectrum', description: 'Creative Bold asymmetric design', preview: '🎨', category: 'Creative', tags: ['design', 'bold', 'asymmetric'], atsScore: 60, badge: '🎭 Asymmetric' },
+  { id: 'vitality', name: 'Vitality', description: 'Healthcare Professional clinical focus', preview: '⚕️', category: 'Healthcare', tags: ['medical', 'clinical', 'healthcare'], atsScore: 90, badge: '🏥 Clinical' },
+  { id: 'catalyst', name: 'Catalyst', description: 'Sales & Business Dev metrics-driven', preview: '📊', category: 'Sales', tags: ['sales', 'metrics', 'revenue'], atsScore: 80, badge: '📈 Metrics' },
+  { id: 'foundation', name: 'Foundation', description: 'Student/Entry-Level education first', preview: '📚', category: 'Entry-Level', tags: ['student', 'education', 'entry'], atsScore: 92, badge: '🎓 Education First' },
+  { id: 'architect', name: 'Architect', description: 'Project-Based timeline design', preview: '🏗️', category: 'Specialized', tags: ['projects', 'timeline', 'visual'], atsScore: 85, badge: '⏰ Timeline' },
   
-  // Professional & Corporate
-  { id: 'modern', name: 'Modern Professional', description: 'Clean, ATS-optimized with subtle accent colors', preview: '🎨', category: 'Professional', tags: ['ats', 'clean', 'versatile'] },
-  { id: 'classic', name: 'Classic Serif', description: 'Timeless traditional format, maximum compatibility', preview: '📋', category: 'Professional', tags: ['traditional', 'formal', 'safe'] },
-  { id: 'corporate', name: 'Corporate Edge', description: 'Finance, consulting, banking - conservative & powerful', preview: '🏢', category: 'Professional', tags: ['finance', 'consulting', 'formal'] },
-  { id: 'minimal', name: 'Minimal Impact', description: 'Less is more - elegant simplicity with strong typography', preview: '⚪', category: 'Professional', tags: ['clean', 'elegant', 'simple'] },
+  // PHASE 3 PROFESSIONAL TEMPLATES - Industry-Specific
+  { id: 'medical-pro', name: 'Medical Pro', description: 'Healthcare professionals with licenses & publications', preview: '🏥', category: 'Healthcare', tags: ['medical', 'clinical', 'licenses'], atsScore: 93, badge: '🩺 Medical' },
+  { id: 'legal-counsel', name: 'Legal Counsel', description: 'Attorneys & legal professionals - formal traditional', preview: '⚖️', category: 'Legal', tags: ['attorney', 'bar', 'formal'], atsScore: 96, badge: '📜 Bar Certified' },
+  { id: 'academic-scholar', name: 'Academic Scholar', description: 'Researchers & professors - publications first', preview: '📚', category: 'Academic', tags: ['research', 'phd', 'publications'], atsScore: 94, badge: '🎓 Academic CV' },
+  { id: 'engineer-blueprint', name: 'Engineer Blueprint', description: 'Engineering professionals - technical projects', preview: '⚙️', category: 'Technical', tags: ['engineering', 'technical', 'projects'], atsScore: 88, badge: '🔧 Engineering' },
+  { id: 'financier', name: 'Financier', description: 'Finance & banking executives - premium styling', preview: '💰', category: 'Finance', tags: ['finance', 'banking', 'executive'], atsScore: 91, badge: '💎 Finance Elite' },
+  { id: 'creative-portfolio', name: 'Creative Portfolio', description: 'Designers & artists - visual portfolio focus', preview: '🎨', category: 'Creative', tags: ['design', 'art', 'portfolio'], atsScore: 68, badge: '🖼️ Portfolio' },
+  { id: 'sales-pro', name: 'Sales Pro', description: 'Sales & business development - metrics driven', preview: '📈', category: 'Sales', tags: ['sales', 'b2b', 'revenue'], atsScore: 82, badge: '💼 Sales Champion' },
+  { id: 'devops', name: 'DevOps', description: 'Tech & software engineers - code-focused', preview: '💻', category: 'Technical', tags: ['devops', 'software', 'tech'], atsScore: 79, badge: '⚡ Tech Pro' },
+  { id: 'europass', name: 'Europass', description: 'International EU standard format - 2-column', preview: '🇪🇺', category: 'International', tags: ['europass', 'international', 'eu'], atsScore: 97, badge: '🌍 EU Standard' },
+  { id: 'cxo', name: 'CXO Executive', description: 'C-suite executives - premium luxury design', preview: '👑', category: 'Executive', tags: ['c-suite', 'ceo', 'premium'], atsScore: 89, badge: '👑 C-Suite' },
   
-  // Technical & Developer
-  { id: 'technical', name: 'Tech Stack', description: 'Developer-focused with skills matrix & GitHub integration', preview: '⚙️', category: 'Technical', tags: ['developer', 'engineer', 'tech'] },
-  { id: 'developer-pro', name: 'Code & Build', description: 'Full-stack, DevOps - technical projects highlighted', preview: '💻', category: 'Technical', tags: ['software', 'fullstack', 'projects'] },
-  { id: 'startup', name: 'Startup Velocity', description: 'Fast-paced, agile environments - growth metrics focus', preview: '🚀', category: 'Technical', tags: ['startup', 'agile', 'growth'] },
-  
-  // Creative & Modern (Multi-Layout)
-  { id: 'creative', name: 'Creative Bold', description: 'Single column design with bold visual elements', preview: '🌈', category: 'Creative', tags: ['design', 'marketing', 'bold', 'single-column'] },
-  { id: 'two-column-modern', name: 'Dual Column Pro', description: '2-column (70/30) - main content + skills sidebar', preview: '📑', category: 'Creative', tags: ['modern', 'visual', '2-column', 'sidebar'] },
-  { id: 'timeline', name: 'Career Timeline', description: 'Vertical timeline layout - visual career progression', preview: '📅', category: 'Creative', tags: ['visual', 'timeline', 'story', 'unique-layout'] },
-  
-  // Industry-Specific
-  { id: 'academic', name: 'Academic Scholar', description: 'PhD, research, publications - citation-ready format', preview: '🎓', category: 'Academic', tags: ['research', 'phd', 'publications'] },
-  { id: 'healthcare', name: 'Medical Professional', description: 'Doctors, nurses, healthcare - licenses & certifications', preview: '⚕️', category: 'Healthcare', tags: ['medical', 'clinical', 'licensed'] },
-  { id: 'legal', name: 'Legal Advocate', description: 'Attorneys, paralegals - bar admissions & case work', preview: '⚖️', category: 'Legal', tags: ['attorney', 'law', 'bar'] },
-  { id: 'sales-executive', name: 'Sales Champion', description: 'Revenue focus - quotas, deals, growth metrics prominent', preview: '📊', category: 'Sales', tags: ['sales', 'revenue', 'quotas'] },
-  { id: 'marketing', name: 'Marketing Maven', description: 'Digital marketing - campaigns, ROI, brand growth', preview: '📱', category: 'Marketing', tags: ['digital', 'campaigns', 'roi'] },
-  
-  // Entry-Level & Compact
-  { id: 'student', name: 'Student Launch', description: 'Single column entry-level - education & projects focus', preview: '📚', category: 'Entry-Level', tags: ['student', 'graduate', 'entry', 'single-column'] },
-  { id: 'one-page-compact', name: 'One-Page Dense', description: 'Ultra-compact single-page - tight spacing layout', preview: '📄', category: 'Compact', tags: ['compact', '1-page', 'concise', 'dense-layout'] },
-  
-  // Specialized Layouts
-  { id: 'project-based', name: 'Portfolio Showcase', description: 'Card-based layout - projects as visual cards', preview: '🎯', category: 'Specialized', tags: ['portfolio', 'projects', 'cards', 'grid-layout'] },
-  { id: 'sidebar-creative', name: 'Creative Sidebar', description: 'Left sidebar (30%) - skills, right (70%) - experience', preview: '🎨', category: 'Specialized', tags: ['sidebar', 'creative', 'two-section', 'split-layout'] },
+  // Original Templates
+  { id: 'executive', name: 'Executive Elite', description: 'Premium C-suite & VP resume with metrics focus', preview: '👔', category: 'Executive', tags: ['leadership', 'senior', 'enterprise'], atsScore: 85 },
+  { id: 'senior-executive', name: 'Board Ready', description: 'Board members, strategic leadership, P&L excellence', preview: '💼', category: 'Executive', tags: ['c-level', 'board', 'strategy'], atsScore: 88 },
+  { id: 'modern', name: 'Modern Professional', description: 'Clean, ATS-optimized with subtle accent colors', preview: '🎨', category: 'Professional', tags: ['ats', 'clean', 'versatile'], atsScore: 85 },
+  { id: 'classic', name: 'Classic Serif', description: 'Timeless traditional format, maximum compatibility', preview: '📋', category: 'Professional', tags: ['traditional', 'formal', 'safe'], atsScore: 90 },
+  { id: 'corporate', name: 'Corporate Edge', description: 'Finance, consulting, banking - conservative & powerful', preview: '🏢', category: 'Professional', tags: ['finance', 'consulting', 'formal'], atsScore: 90 },
+  { id: 'minimal', name: 'Minimal Impact', description: 'Less is more - elegant simplicity with strong typography', preview: '⚪', category: 'Professional', tags: ['clean', 'elegant', 'simple'], atsScore: 88 },
+  { id: 'technical', name: 'Tech Stack', description: 'Developer-focused with skills matrix & GitHub integration', preview: '⚙️', category: 'Technical', tags: ['developer', 'engineer', 'tech'], atsScore: 82 },
+  { id: 'developer-pro', name: 'Code & Build', description: 'Full-stack, DevOps - technical projects highlighted', preview: '💻', category: 'Technical', tags: ['software', 'fullstack', 'projects'], atsScore: 80 },
+  { id: 'startup', name: 'Startup Velocity', description: 'Fast-paced, agile environments - growth metrics focus', preview: '🚀', category: 'Technical', tags: ['startup', 'agile', 'growth'], atsScore: 75 },
+  { id: 'creative', name: 'Creative Bold', description: 'Single column design with bold visual elements', preview: '🌈', category: 'Creative', tags: ['design', 'marketing', 'bold'], atsScore: 65 },
+  { id: 'two-column-modern', name: 'Dual Column Pro', description: '2-column (70/30) - main content + skills sidebar', preview: '📑', category: 'Creative', tags: ['modern', 'visual', '2-column'], atsScore: 80 },
+  { id: 'timeline', name: 'Career Timeline', description: 'Vertical timeline layout - visual career progression', preview: '📅', category: 'Creative', tags: ['visual', 'timeline', 'story'], atsScore: 70 },
+  { id: 'academic', name: 'Academic Scholar', description: 'PhD, research, publications - citation-ready format', preview: '🎓', category: 'Academic', tags: ['research', 'phd', 'publications'], atsScore: 88 },
+  { id: 'healthcare', name: 'Medical Professional', description: 'Doctors, nurses, healthcare - licenses & certifications', preview: '⚕️', category: 'Healthcare', tags: ['medical', 'clinical', 'licensed'], atsScore: 88 },
+  { id: 'legal', name: 'Legal Advocate', description: 'Attorneys, paralegals - bar admissions & case work', preview: '⚖️', category: 'Legal', tags: ['attorney', 'law', 'bar'], atsScore: 92 },
+  { id: 'sales-executive', name: 'Sales Champion', description: 'Revenue focus - quotas, deals, growth metrics prominent', preview: '📊', category: 'Sales', tags: ['sales', 'revenue', 'quotas'], atsScore: 78 },
+  { id: 'marketing', name: 'Marketing Maven', description: 'Digital marketing - campaigns, ROI, brand growth', preview: '📱', category: 'Marketing', tags: ['digital', 'campaigns', 'roi'], atsScore: 72 },
+  { id: 'student', name: 'Student Launch', description: 'Single column entry-level - education & projects focus', preview: '📚', category: 'Entry-Level', tags: ['student', 'graduate', 'entry'], atsScore: 85 },
+  { id: 'one-page-compact', name: 'One-Page Dense', description: 'Ultra-compact single-page - tight spacing layout', preview: '📄', category: 'Compact', tags: ['compact', '1-page', 'concise'], atsScore: 82 },
+  { id: 'project-based', name: 'Portfolio Showcase', description: 'Card-based layout - projects as visual cards', preview: '🎯', category: 'Specialized', tags: ['portfolio', 'projects', 'cards'], atsScore: 75 },
 ];
 
 interface TemplateSelectorProps {
@@ -208,8 +219,23 @@ export default function TemplateSelectorV2({
             <button
               key={template.id}
               onClick={() => onSelectTemplate(template.id)}
-              className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-600 hover:shadow-lg transition-all text-left group"
+              className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-600 hover:shadow-lg transition-all text-left group relative"
             >
+              {/* ATS Score Badge */}
+              {template.atsScore && (
+                <div
+                  className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-bold ${
+                    template.atsScore >= 90
+                      ? 'bg-green-100 text-green-700'
+                      : template.atsScore >= 70
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-purple-100 text-purple-700'
+                  }`}
+                >
+                  {template.atsScore}%
+                </div>
+              )}
+
               {/* Visual Preview */}
               {template.colors ? (
                 <div className="mb-3 p-3 rounded border" style={{
@@ -228,19 +254,29 @@ export default function TemplateSelectorV2({
                     backgroundColor: template.colors?.primary || '#000',
                     width: '70%'
                   }}></div>
-                  {template.fonts?.primaryFont && (
-                    <div className="text-[8px] mt-2 opacity-50" style={{
-                      fontFamily: template.fonts.primaryFont.split(',')[0] || 'inherit'
-                    }}>
-                      {template.fonts.family || 'Font'}
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div className="text-3xl mb-3">{template.preview}</div>
               )}
+              
               <h3 className="text-sm font-semibold text-gray-900 mb-1">{template.name}</h3>
+              
+              {/* Badge */}
+              {template.badge && (
+                <div className="mb-2 inline-block px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-medium rounded">
+                  {template.badge}
+                </div>
+              )}
+              
               <p className="text-xs text-gray-600 mb-3 line-clamp-2">{template.description}</p>
+              
+              {/* Category Tag */}
+              <div className="mb-3">
+                <span className="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded">
+                  {template.category}
+                </span>
+              </div>
+              
               <div className="w-full px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-medium text-center group-hover:bg-blue-700">
                 Use Template
               </div>

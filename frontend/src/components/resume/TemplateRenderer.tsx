@@ -21,6 +21,26 @@ import TwoColumnModernTemplate from '@/components/templates/TwoColumnModernTempl
 import OnePageCompactTemplate from '@/components/templates/OnePageCompactTemplate';
 import TimelineTemplate from '@/components/templates/TimelineTemplate';
 import ProjectBasedTemplate from '@/components/templates/ProjectBasedTemplate';
+import AtlasTemplate from '@/components/templates/AtlasTemplate';
+import OsloTemplate from '@/components/templates/OsloTemplate';
+import VelocityTemplate from '@/components/templates/VelocityTemplate';
+import ExecutiveProTemplate from '@/components/templates/ExecutiveProTemplate';
+import PrecisionTemplate from '@/components/templates/PrecisionTemplate';
+import SpectrumTemplate from '@/components/templates/SpectrumTemplate';
+import VitalityTemplate from '@/components/templates/VitalityTemplate';
+import CatalystTemplate from '@/components/templates/CatalystTemplate';
+import FoundationTemplate from '@/components/templates/FoundationTemplate';
+import ArchitectTemplate from '@/components/templates/ArchitectTemplate';
+import MedicalProTemplate from '@/components/templates/MedicalProTemplate';
+import LegalCounselTemplate from '@/components/templates/LegalCounselTemplate';
+import AcademicScholarTemplate from '@/components/templates/AcademicScholarTemplate';
+import EngineerBlueprintTemplate from '@/components/templates/EngineerBlueprintTemplate';
+import FinancierTemplate from '@/components/templates/FinancierTemplate';
+import CreativePortfolioTemplate from '@/components/templates/CreativePortfolioTemplate';
+import SalesProTemplate from '@/components/templates/SalesProTemplate';
+import DevOpsTemplate from '@/components/templates/DevOpsTemplate';
+import EuropassTemplate from '@/components/templates/EuropassTemplate';
+import CXOTemplate from '@/components/templates/CXOTemplate';
 import DynamicTemplate from '@/components/templates/DynamicTemplate';
 import TemplateStore from '@/lib/templateStore';
 
@@ -61,6 +81,28 @@ export default function TemplateRenderer({ templateId, profile, customizations }
     'one-page-compact': OnePageCompactTemplate,
     timeline: TimelineTemplate,
     'project-based': ProjectBasedTemplate,
+    // NEW ENHANCED TEMPLATES
+    atlas: AtlasTemplate,
+    oslo: OsloTemplate,
+    velocity: VelocityTemplate,
+    'executive-pro': ExecutiveProTemplate,
+    precision: PrecisionTemplate,
+    spectrum: SpectrumTemplate,
+    vitality: VitalityTemplate,
+    catalyst: CatalystTemplate,
+    foundation: FoundationTemplate,
+    architect: ArchitectTemplate,
+    // PHASE 3 PROFESSIONAL TEMPLATES
+    'medical-pro': MedicalProTemplate,
+    'legal-counsel': LegalCounselTemplate,
+    'academic-scholar': AcademicScholarTemplate,
+    'engineer-blueprint': EngineerBlueprintTemplate,
+    financier: FinancierTemplate,
+    'creative-portfolio': CreativePortfolioTemplate,
+    'sales-pro': SalesProTemplate,
+    devops: DevOpsTemplate,
+    europass: EuropassTemplate,
+    cxo: CXOTemplate,
   };
 
   useEffect(() => {
