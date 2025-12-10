@@ -5,8 +5,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install dependencies (including dev for build)
+RUN npm ci
 
 # Copy source code
 COPY . .
@@ -14,8 +14,14 @@ COPY . .
 # Build TypeScript
 RUN npm run build
 
+# Remove dev dependencies
+RUN npm prune --production
+
 # Create uploads directory
 RUN mkdir -p uploads
+
+# Create scripts directory for seed script
+RUN mkdir -p scripts
 
 # Expose port
 EXPOSE 5000

@@ -1,76 +1,45 @@
 # ProfileBuilder - VPS Deployment Guide (aaPanel + Docker)
 
-## Prerequisites
-- VPS with aaPanel installed
-- Docker installed via aaPanel
-- Domain pointed to your VPS IP
+## Quick Deploy (3 Steps)
 
----
-
-## Step 1: Install Docker (via aaPanel)
-
-1. Login to aaPanel
-2. Go to **Docker** in the left menu
-3. Click **Install** if not already installed
-
----
-
-## Step 2: Upload Project to VPS
-
-### Option A: Git Clone
+### Step 1: Upload to VPS
 ```bash
 cd /www/wwwroot
 git clone https://github.com/DarkestEver/resumebuilder.git profilebuilder
 cd profilebuilder
 ```
 
-### Option B: Upload via aaPanel File Manager
-1. Go to **Files** in aaPanel
-2. Navigate to `/www/wwwroot/`
-3. Upload your project zip and extract
-
----
-
-## Step 3: Configure Environment
-
+### Step 2: Configure (Only update AI key!)
 ```bash
-cd /www/wwwroot/profilebuilder
-
-# Copy example env file
-cp .env.example .env
-
-# Edit with your values
-nano .env
+nano .env.production
+```
+**Only change this line:**
+```
+GEMINI_API_KEY=your-actual-gemini-api-key
 ```
 
-**Fill in these values:**
-```env
-MONGO_PASSWORD=YourSecurePassword123!
-JWT_SECRET=generate-a-32-char-secret-key-here
-GEMINI_API_KEY=your-gemini-key
-APP_URL=https://yourdomain.com
-```
-
----
-
-## Step 4: Build and Run with Docker
-
+### Step 3: Deploy
 ```bash
-cd /www/wwwroot/profilebuilder
-
-# Build and start all services
-docker-compose -f docker-compose.prod.yml up -d --build
-
-# Check if running
-docker-compose -f docker-compose.prod.yml ps
-
-# View logs
-docker-compose -f docker-compose.prod.yml logs -f
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
 ```
+
+**Done!** 🎉
 
 ---
 
-## Step 5: Configure Reverse Proxy (aaPanel)
+## Default Login Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@profilebuilder.com | Admin@123456 |
+| Demo | demo@profilebuilder.com | Demo@123456 |
+| Test | john@example.com | Test@123456 |
+| Test | jane@example.com | Test@123456 |
+
+---
+
+## Manual Deployment (Alternative)
 
 ### For Frontend (port 3000):
 
