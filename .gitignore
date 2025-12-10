@@ -1,12 +1,45 @@
-node_modules
-dist
-build
-.next
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files (keep .env.production as template)
 .env
 .env.local
 .env.*.local
+!.env.production
+
+# Logs
 *.log
-coverage
+logs/
+npm-debug.log*
+
+# Testing
+coverage/
+test-results/
+playwright-report/
+*.png
+*.jpg
+
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
-logs
+Thumbs.db
+
+# TypeScript
 *.tsbuildinfo
+
+# Uploads (user content)
+uploads/*
+!uploads/.gitkeep
+
+# Misc
+*.pdf
+*.tmp

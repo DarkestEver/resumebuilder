@@ -1,254 +1,201 @@
-# ProfileBuilder - AI-Powered Resume Builder Portal
+# ProfileBuilder - AI-Powered Resume Builder
 
-AI-powered resume builder with CV extraction, 20+ templates, video profiles, public sharing, and subscription tiers.
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Node](https://img.shields.io/badge/node-18%2B-green)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## 🚀 Quick Start
+AI-powered resume builder with CV extraction, 20+ professional templates, video profiles, public sharing, and subscription tiers.
 
-### Prerequisites
-- Node.js 18+ and npm 9+
-- MongoDB 5.0+
-- Redis 7+
-- AWS S3 account (for file storage)
+## ✨ Features
 
-### Installation
+- 🤖 **AI-Powered** - CV extraction, content enhancement, ATS optimization
+- 📄 **20+ Templates** - Professional, creative, industry-specific designs
+- 🎥 **Video Profiles** - Add video introductions to your resume
+- 🔗 **Public Sharing** - Custom URLs and QR codes for easy sharing
+- 📊 **ATS Scoring** - Optimize your resume for applicant tracking systems
+- 🔄 **LinkedIn Sync** - Import profile data from LinkedIn
+- 💳 **Subscription Tiers** - Free, Pro, and Enterprise plans
 
-1. **Clone the repository**
+---
+
+## 🚀 Quick Deploy (VPS + Docker)
+
+### 1. Clone & Configure
 ```bash
-git clone <repository-url>
-cd ProfileBuilder
+git clone https://github.com/DarkestEver/resumebuilder.git
+cd resumebuilder
+
+# Add your Gemini API key
+nano .env.production
 ```
 
-2. **Install dependencies**
+### 2. Deploy
 ```bash
+chmod +x scripts/deploy.sh
+./scripts/deploy.sh
+```
+
+### 3. Access
+- **App**: http://your-server:3000
+- **API**: http://your-server:5000
+
+### Default Accounts
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | admin@profilebuilder.com | Admin@123456 |
+| Demo | demo@profilebuilder.com | Demo@123456 |
+
+---
+
+## 💻 Local Development
+
+### Prerequisites
+- Node.js 18+
+- MongoDB (local or Atlas)
+- npm 9+
+
+### Setup
+```bash
+# Install dependencies
 npm install
 cd frontend && npm install
 cd ../backend && npm install
 cd ..
+
+# Start development (2 terminals)
+npm run dev:backend   # Terminal 1 - API on port 5000
+npm run dev:frontend  # Terminal 2 - UI on port 3000
 ```
 
-3. **Setup environment variables**
-
-Frontend:
-```bash
-cp frontend/.env.example frontend/.env.local
+### Environment Variables
+Create `backend/.env`:
+```env
+MONGODB_URI=mongodb://localhost:27017/profilebuilder
+JWT_SECRET=your-secret-key
+GEMINI_API_KEY=your-gemini-key
 ```
 
-Backend:
-```bash
-cp backend/.env.example backend/.env
-```
-
-Edit the `.env` files with your credentials.
-
-4. **Start MongoDB and Redis**
-```bash
-# MongoDB (if using local)
-mongod
-
-# Redis (if using local)
-redis-server
-```
-
-5. **Run development servers**
-```bash
-# From root directory (runs both frontend and backend)
-npm run dev
-
-# Or run separately:
-npm run dev:frontend  # Frontend on http://localhost:3000
-npm run dev:backend   # Backend on http://localhost:5000
-```
+---
 
 ## 📁 Project Structure
 
 ```
-ProfileBuilder/
-├── frontend/               # Next.js 14 frontend
+profilebuilder/
+├── frontend/          # Next.js frontend
 │   ├── src/
-│   │   ├── app/           # Next.js app router pages
-│   │   ├── components/    # React components
-│   │   ├── lib/          # Utilities and helpers
-│   │   ├── hooks/        # Custom React hooks
-│   │   ├── types/        # TypeScript types
-│   │   └── styles/       # Global styles
-│   ├── public/           # Static files
+│   │   ├── components/   # React components
+│   │   │   └── templates/ # 20+ resume templates
+│   │   ├── pages/        # Next.js pages
+│   │   └── lib/          # Utilities
 │   └── package.json
 │
-├── backend/              # Express/Node.js backend
+├── backend/           # Express API
 │   ├── src/
-│   │   ├── models/       # Mongoose models
-│   │   ├── controllers/  # Route controllers
-│   │   ├── services/     # Business logic
+│   │   ├── controllers/  # Route handlers
+│   │   ├── models/       # MongoDB models
 │   │   ├── routes/       # API routes
-│   │   ├── middleware/   # Express middleware
-│   │   ├── utils/        # Utility functions
-│   │   ├── config/       # Configuration
-│   │   └── types/        # TypeScript types
+│   │   └── services/     # Business logic
 │   └── package.json
 │
-├── .github/              # GitHub specific files
-│   └── copilot-instructions.md
-├── PROJECT_ROADMAP.md    # Complete development plan
-├── IMPLEMENTATION_STATUS.md  # Progress tracking
-└── package.json          # Root package.json (workspace)
+├── scripts/           # Deployment scripts
+│   ├── deploy.sh         # One-click deploy
+│   └── seed-database.js  # Create test users
+│
+├── docs/              # Documentation
+├── tests/             # E2E tests
+└── docker-compose.prod.yml
 ```
-
-## 🏗️ Architecture
-
-### Frontend (Next.js + React)
-- **Framework**: Next.js 14 with App Router
-- **UI**: TailwindCSS + ShadCN components
-- **State**: Zustand for global state
-- **Forms**: React Hook Form + Zod validation
-- **HTTP**: Axios for API calls
-
-### Backend (Node.js + Express)
-- **Framework**: Express.js with TypeScript
-- **Database**: MongoDB with Mongoose ODM
-- **Cache**: Redis for sessions and AI responses
-- **Auth**: JWT + Refresh tokens, OAuth (Google, LinkedIn, GitHub)
-- **Storage**: AWS S3 for file uploads
-- **Payments**: Stripe for subscriptions
-
-### Key Features
-- ✅ Authentication (Email/Password, OAuth, OTP)
-- ✅ Profile Builder with AI enhancement
-- ✅ CV Upload & Extraction (AI-powered)
-- ✅ 20+ Resume Templates
-- ✅ ATS Optimization & Scoring
-- ✅ Tailored Resume Generation
-- ✅ Video Profile Support
-- ✅ Public Profile Sharing
-- ✅ Analytics Dashboard
-- ✅ Subscription Management
-
-## 🛠️ Development
-
-### Available Scripts
-
-**Root:**
-- `npm run dev` - Run both frontend and backend
-- `npm run build` - Build both projects
-- `npm test` - Run all tests
-- `npm run lint` - Lint all code
-- `npm run format` - Format code with Prettier
-
-**Frontend:**
-- `npm run dev` - Start Next.js dev server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Lint code
-
-**Backend:**
-- `npm run start:dev` - Start with hot reload
-- `npm run build` - Compile TypeScript
-- `npm run start:prod` - Start production server
-- `npm test` - Run tests
-
-## 📚 Documentation
-
-- [Complete Roadmap](./PROJECT_ROADMAP.md) - 22 phases, 52-week plan
-- [Implementation Status](./IMPLEMENTATION_STATUS.md) - Track progress
-- [AI Agent Guidelines](./.github/copilot-instructions.md) - For AI development
-
-## 🔐 Security
-
-- JWT tokens with refresh token rotation
-- Password hashing with bcrypt
-- Rate limiting on sensitive endpoints
-- File upload virus scanning
-- Input validation and sanitization
-- CORS and Helmet security headers
-
-## 🧪 Testing
-
-```bash
-# Run all tests
-npm test
-
-# Frontend tests
-cd frontend && npm test
-
-# Backend tests
-cd backend && npm test
-
-# Test coverage
-npm run test:coverage
-```
-
-## 🚢 Deployment
-
-### Frontend (Vercel)
-```bash
-cd frontend
-npm run build
-# Deploy to Vercel or your hosting platform
-```
-
-### Backend (AWS/GCP/Railway)
-```bash
-cd backend
-npm run build
-npm run start:prod
-```
-
-## 📊 Tech Stack
-
-**Frontend:**
-- Next.js 14, React 18, TypeScript
-- TailwindCSS, ShadCN UI, Lucide Icons
-- Zustand, Axios, React Hook Form, Zod
-- React Beautiful DnD / dnd-kit
-
-**Backend:**
-- Node.js, Express, TypeScript
-- MongoDB, Mongoose, Redis
-- JWT, Passport.js, Bcrypt
-- AWS S3, Stripe, Nodemailer
-
-**AI:**
-- OpenAI GPT-4
-- Anthropic Claude 3.5
-- Google Gemini 1.5
-
-## 🤝 Contributing
-
-This is an AI-assisted development project. See [AI Agent Guidelines](./.github/copilot-instructions.md) for development patterns.
-
-## 📄 License
-
-Proprietary - All rights reserved
-
-## 🆘 Support
-
-For issues or questions, please check:
-1. [PROJECT_ROADMAP.md](./PROJECT_ROADMAP.md) for planned features
-2. [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for current status
-3. Create an issue in the repository
 
 ---
 
-**Version**: 1.0.0-beta  
-**Last Updated**: January 15, 2025  
-**Status**: 65% Complete - Frontend 90%, Backend 85%, AI Features Pending
+## 🔧 Available Scripts
 
-## 📊 Development Progress
+```bash
+# Development
+npm run dev:backend     # Start backend (port 5000)
+npm run dev:frontend    # Start frontend (port 3000)
 
-### Completed (65%)
-- ✅ Backend Authentication: 35+ endpoints
-- ✅ Backend Profile & Resume: 18 endpoints  
-- ✅ Frontend Auth Pages: 5 pages
-- ✅ Frontend Dashboard: Stats, resume management
-- ✅ Profile Builder: All 13 sections with auto-save
-- ✅ Resume Editor: Template selection, customization, preview
-- ✅ Navigation: Header, landing page, public routes
-- 🔄 CV Upload: UI done, backend parsing 50% complete
+# Production
+npm run build           # Build both
+npm run start:backend   # Start backend
+npm run start:frontend  # Start frontend
 
-### In Progress
-- Phase 4: CV Parsing (50%) - OCR and AI extraction
-- Phase 5: Template Engine - 20+ professional templates
-- Phase 6: AI Enhancement - Content improvement suggestions
-- Phase 7: PDF Generation - Resume PDF export
-- Phases 8-16: Advanced features (analytics, subscriptions, payments)
+# Docker
+docker-compose -f docker-compose.prod.yml up -d
+```
 
-### See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for detailed phase breakdown
+---
+
+## 📚 API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register user |
+| POST | `/api/auth/login` | Login |
+| GET | `/api/profiles` | Get user profile |
+| PUT | `/api/profiles` | Update profile |
+| GET | `/api/resumes` | List resumes |
+| POST | `/api/resumes` | Create resume |
+| POST | `/api/cv/upload` | Upload CV for extraction |
+| POST | `/api/ai/enhance` | AI content enhancement |
+| GET | `/api/public/:username` | Public profile |
+
+---
+
+## 🛠️ Tech Stack
+
+**Frontend:**
+- Next.js 16
+- React 19
+- TailwindCSS
+- ShadCN UI
+
+**Backend:**
+- Node.js / Express
+- MongoDB / Mongoose
+- JWT Authentication
+- Socket.IO (real-time)
+
+**AI Integration:**
+- Google Gemini
+- OpenAI (optional)
+- Anthropic Claude (optional)
+
+**Infrastructure:**
+- Docker
+- Redis (caching)
+- Nginx (reverse proxy)
+
+---
+
+## 📖 Documentation
+
+See the `/docs` folder for detailed documentation:
+- [Deployment Guide](docs/DEPLOYMENT_GUIDE.md)
+- [Project Roadmap](docs/PROJECT_ROADMAP.md)
+- [ATS Optimization](docs/ATS_SCORING_GUIDE.md)
+- [LinkedIn Integration](docs/LINKEDIN_OAUTH_SETUP_GUIDE.md)
+
+---
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing`)
+5. Open a Pull Request
+
+---
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [ShadCN UI](https://ui.shadcn.com/) - Beautiful UI components
+- [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS
+- [Google Gemini](https://ai.google.dev/) - AI capabilities
